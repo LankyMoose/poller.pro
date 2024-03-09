@@ -1,4 +1,4 @@
-import { UTC, string } from "$/utils"
+import { UTC } from "$/utils"
 import { relations } from "drizzle-orm"
 import {
   text,
@@ -9,7 +9,6 @@ import {
 } from "drizzle-orm/sqlite-core"
 import { polls } from "./polls"
 import { pollVotes } from "./pollVotes"
-import { createHashColumn } from "../utils"
 
 export { users, userRelations, userAuths, userAuthRelations }
 export type { UserModel, UserInsertModel, UserAuthModel, UserAuthInsertModel }
@@ -18,10 +17,12 @@ const users = sqliteTable(
   "user",
   {
     id: integer("id").primaryKey(),
-    hash: createHashColumn(),
+    webId: text("web_id")
+      .notNull()
+      .$default(() => crypto.randomUUID()),
     name: text("name").notNull(),
     avatarUrl: text("avatar_url"),
-    isAdmin: integer("is_admin", { mode: "boolean" }),
+    isAdmin: integer("is_admin", { mode: "boolean" }).default(false),
     createdAt: integer("created_at").notNull().$defaultFn(UTC.now),
     disabled: integer("disabled", { mode: "boolean" }).default(false),
   },

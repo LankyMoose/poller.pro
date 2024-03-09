@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "id": "1c2a265e-f52b-4240-a3ac-37ca5f8f07e7",
+  "id": "10f926d4-ddeb-40ec-aac6-2a050e17540f",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "poll": {
@@ -14,9 +14,9 @@
           "notNull": true,
           "autoincrement": false
         },
-        "hash": {
-          "name": "hash",
-          "type": "text(6)",
+        "web_id": {
+          "name": "web_id",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -321,9 +321,9 @@
           "notNull": true,
           "autoincrement": false
         },
-        "hash": {
-          "name": "hash",
-          "type": "text(6)",
+        "web_id": {
+          "name": "web_id",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false

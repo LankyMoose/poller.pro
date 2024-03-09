@@ -5,7 +5,6 @@ import { users } from "./users"
 import { UTC } from "$/utils"
 import { pollOptions } from "./pollOptions"
 import { pollVotes } from "./pollVotes"
-import { createHashColumn } from "../utils"
 
 export { polls, pollRelations }
 export type { PollModel, PollInsertModel }
@@ -14,7 +13,9 @@ const polls = sqliteTable(
   "poll",
   {
     id: integer("id").primaryKey(),
-    hash: createHashColumn(),
+    webId: text("web_id")
+      .notNull()
+      .$default(() => crypto.randomUUID()),
     userId: integer("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
