@@ -10,5 +10,5 @@ export function LayoutDefault({ children }: { children?: JSX.Element[] }) {
 }
 
 function Content({ children }: { children?: JSX.Element[] }) {
-  return <div className="p-5 pb-10  ">{children}</div>
+  return <div className="p-5 pb-10 w-full flex-grow">{children}</div>
 }

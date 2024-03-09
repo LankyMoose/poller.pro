@@ -1,5 +1,7 @@
 //https://vike.dev/pageContext#custom
 
+import { UserModel } from "$/drizzle/schema"
+
 declare global {
   namespace Vike {
     interface PageContext {
@@ -20,6 +22,8 @@ declare global {
       routeParams: Record<string, string>
 
       data: Record<string, unknown>
+
+      user: UserModel | null
     }
   }
 }

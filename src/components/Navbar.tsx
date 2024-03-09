@@ -1,15 +1,12 @@
+import { UserAuth } from "./UserAuth"
+
 export function Navbar() {
   return (
-    <nav className="flex gap-4 p-4">
+    <nav className="flex gap-4 p-4 w-full">
       <a className="text-sm underline" href="/">
-        Home
+        poller.pro
       </a>
-      <a className="text-sm underline" href="/counter">
-        Counter
-      </a>
-      <a className="text-sm underline" href="/products">
-        Products
-      </a>
+      <UserAuth />
     </nav>
   )
 }

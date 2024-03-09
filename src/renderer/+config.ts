@@ -1,7 +1,7 @@
 import type { Config, PageContextServer } from "vike/types"
 
 export default {
-  passToClient: ["routeParams", "Layout"] satisfies Array<
+  passToClient: ["routeParams", "Layout", "user"] satisfies Array<
     keyof PageContextServer
   >,
   /* 
@@ -9,10 +9,10 @@ export default {
    using destructive hydration. Currently disabled as chrome 
    has a small delay when programattically setting doc title 😭
   */
-  // clientRouting: true,
+  clientRouting: true,
   meta: {
     title: {
-      env: { server: true, client: true },
+      env: { server: false, client: true },
     },
   },
 } satisfies Config

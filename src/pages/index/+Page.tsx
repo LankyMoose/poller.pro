@@ -1,4 +1,3 @@
-import { Counter } from "$/components/Counter"
 import { PageTitle } from "$/components/atoms/PageTitle"
 
 export { Page }
