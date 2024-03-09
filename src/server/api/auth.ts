@@ -4,6 +4,7 @@ import type { CookieSerializeOptions } from "@fastify/cookie"
 import { userService } from "../services/userService"
 import { AuthProvider, authService } from "../services/authService"
 import { env } from "../env"
+import { PublicUser } from "$/types"
 
 export const cookieSettings = {
   domain: env.host || "localhost",
@@ -65,11 +66,10 @@ export function configureAuthRoutes(app: FastifyInstance) {
       })
     }
 
+    const publicUser = user as PublicUser & { id?: number }
+    delete publicUser.id
+
     reply.setCookie("user", JSON.stringify(user), {
-      ...cookieSettings,
-      httpOnly: false,
-    })
-    reply.setCookie("access_token", access_token, {
       ...cookieSettings,
       httpOnly: true,
     })
@@ -80,12 +80,9 @@ export function configureAuthRoutes(app: FastifyInstance) {
   app.get("/logout", async function (_, reply) {
     reply.clearCookie("user", {
       ...cookieSettings,
-      httpOnly: false,
-    })
-    reply.clearCookie("access_token", {
-      ...cookieSettings,
       httpOnly: true,
     })
+
     reply.redirect("/")
   })
 }

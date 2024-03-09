@@ -7,8 +7,8 @@ import fStatic from "@fastify/static"
 import { renderPage } from "vike/server"
 import { env } from "./env"
 import { OAuth2Namespace } from "@fastify/oauth2"
-import { UserModel } from "$/drizzle/schema"
 import { configureAuthRoutes } from "./api/auth"
+import { PublicUser } from "$/types"
 
 declare module "fastify" {
   export interface FastifyInstance {
@@ -75,7 +75,7 @@ async function startServer() {
 
     const pageContextInit = {
       urlOriginal: request.raw.url || "",
-      user: reqUser ? (JSON.parse(reqUser) as UserModel) : null,
+      user: reqUser ? (JSON.parse(reqUser) as PublicUser) : null,
     }
     const pageContext = await renderPage(pageContextInit)
     const { httpResponse } = pageContext
