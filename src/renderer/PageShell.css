@@ -21,6 +21,19 @@
   }
 }
 
+@media (prefers-color-scheme: dark) {
+  :root {
+    color: #ffffff;
+    background-color: #1e1e1e;
+  }
+
+  *,
+  ::before,
+  ::after {
+    border-color: #555;
+  }
+}
+
 body {
   margin: 0;
   font-family: sans-serif;
