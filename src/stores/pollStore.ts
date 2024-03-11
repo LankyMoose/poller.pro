@@ -8,7 +8,7 @@ export const usePollStore = createStore(
   (set) => ({
     setPolls: (polls: PollWithMeta[]) => set((state) => ({ ...state, polls })),
     addPoll: (poll: PollWithMeta) =>
-      set((state) => ({ ...state, polls: [...state.polls, poll] })),
+      set((state) => ({ ...state, polls: [poll, ...state.polls] })),
     deletePoll: (id: number) =>
       set((state) => ({
         ...state,

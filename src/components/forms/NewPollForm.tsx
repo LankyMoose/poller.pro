@@ -3,7 +3,7 @@ import { Button } from "../atoms/Button"
 import { MinusIcon } from "../icons/MinusIcon"
 import { Input } from "../atoms/Input"
 import { PlusIcon } from "../icons/PlusIcon"
-import { pollFormScheme } from "$/models"
+import { PollFormScheme, pollFormScheme } from "$/models"
 import { usePollStore } from "$/stores/pollStore"
 import { PollWithMeta } from "$/server/services/pollService"
 
@@ -23,7 +23,10 @@ export function NewPollForm({ close }: { close: () => void }) {
     pollFormScheme.safeParse({ text: titleInputValue, options }).success
 
   async function handleSubmit() {
-    const payload = pollFormScheme.parse({ text: titleInputValue, options })
+    const payload: PollFormScheme = pollFormScheme.parse({
+      text: titleInputValue,
+      options,
+    })
     setSubmitting(true)
     try {
       const res = await fetch("/api/polls", {

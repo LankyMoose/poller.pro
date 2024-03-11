@@ -8,6 +8,7 @@ import { Modal } from "$/components/modal/Modal"
 import { NewPollForm } from "$/components/forms/NewPollForm"
 import { PollVoteScheme } from "$/models"
 import { PollWithMeta } from "$/server/services/pollService"
+import { CircleTickIcon } from "$/components/icons/CircleTickIcon"
 
 export { Page }
 
@@ -29,7 +30,7 @@ function Page() {
           <NewPollForm close={() => setAddPollOpen(false)} />
         </Modal>
       </div>
-      <div className="flex-grow flex flex-col h-full items-center justify-center">
+      <div className="flex-grow flex flex-col h-full w-full items-center justify-center">
         <PollListDisplay />
       </div>
     </div>
@@ -55,7 +56,7 @@ function PollListDisplay() {
   if (loading) return <Spinner />
 
   return (
-    <div>
+    <>
       {polls.length === 0 && (
         <p className="text-center">
           No polls yet. Add one with the button above ☝️
@@ -64,7 +65,7 @@ function PollListDisplay() {
       {polls.map((poll) => (
         <PollCard id={poll.id} />
       ))}
-    </div>
+    </>
   )
 }
 
@@ -109,28 +110,31 @@ function PollCard({ id }: { id: number }) {
   }
 
   return (
-    <div>
-      <h4>{poll.text}</h4>
+    <div className="border p-2 m-2 rounded w-full sm:w-1/2 bg-neutral-100 dark:bg-neutral-800">
+      <h4 className="font-bold mb-2 flex items-center justify-between ">
+        {poll.text}{" "}
+        {(user?.isAdmin || user?.id === poll.user.id) && (
+          <Button variant="danger" onclick={handleDelete}>
+            Delete
+          </Button>
+        )}
+      </h4>
+      <hr className="my-2" />
       <ul className="flex gap-2 flex-col mb-2">
         {poll.pollOptions.map((o) => (
           <li className="flex">
             <button
-              className="w-full bg-primary"
+              className="w-full p-2 bg-purple-500 flex justify-between items-center text-white"
               disabled={poll.userVote === o.id || isVoting}
               onclick={() => handleVote(o.id)}
             >
               {o.text}
 
-              {poll.userVote === o.id && (
-                <div className="w-4 h-4 bg-white rounded-full">Voted</div>
-              )}
+              {poll.userVote === o.id && <CircleTickIcon />}
             </button>
           </li>
         ))}
       </ul>
-      {(user?.isAdmin || user?.id === poll.user.id) && (
-        <Button onclick={handleDelete}>Delete</Button>
-      )}
     </div>
   )
 }
