@@ -1,18 +1,15 @@
 import { Spinner } from "$/components/atoms/Spinner"
 import { usePageContext } from "$/context/pageContext"
 import { usePollStore } from "$/stores/pollStore"
-import { useEffect, useFetch, useModel, useState } from "kaioken"
-import type { PollWithMetaList } from "$/server/services/pollService"
+import { useEffect, useState } from "kaioken"
 import { PlusIcon } from "$/components/icons/PlusIcon"
 import { Button } from "$/components/atoms/Button"
 import { Modal } from "$/components/modal/Modal"
-import { MinusIcon } from "$/components/icons/MinusIcon"
 import { NewPollForm } from "$/components/forms/NewPollForm"
 
 export { Page }
 
 function Page() {
-  const { isClient } = usePageContext()
   const [addPollOpen, setAddPollOpen] = useState(false)
   return (
     <div className="w-full h-full flex-grow flex flex-col items-center justify-center">
@@ -31,14 +28,14 @@ function Page() {
         </Modal>
       </div>
       <div className="flex-grow flex flex-col h-full items-center justify-center">
-        {!isClient ? <Spinner /> : <PollListDisplay />}
+        <PollListDisplay />
       </div>
     </div>
   )
 }
 
 function PollListDisplay() {
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const { value: polls, setPolls } = usePollStore(
     (state) => state.polls,
     (prev, next) => prev.length === next.length
@@ -46,7 +43,11 @@ function PollListDisplay() {
   useEffect(() => {
     fetch("/api/polls")
       .then((res) => res.json())
-      .then(setPolls)
+      .then((data) => {
+        console.log({ data })
+        setPolls(data)
+        setLoading(false)
+      })
   }, [])
 
   if (loading) return <Spinner />
@@ -55,7 +56,7 @@ function PollListDisplay() {
     <div>
       {polls.length === 0 && (
         <p className="text-center">
-          No poll yet. Add one with the button above ☝️
+          No polls yet. Add one with the button above ☝️
         </p>
       )}
       {polls.map((poll) => (
@@ -73,9 +74,13 @@ function PollCard({ id }: { id: number }) {
   if (!poll) return null
 
   async function handleDelete() {
-    const res = await fetch(`/api/polls/${id}`, { method: "DELETE" })
-    if (res.ok) {
-      deletePoll(id)
+    try {
+      const res = await fetch(`/api/polls/${id}`, { method: "DELETE" })
+      if (res.ok) {
+        deletePoll(id)
+      }
+    } catch (error) {
+      console.error("handleDelete err", error)
     }
   }
 

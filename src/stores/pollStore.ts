@@ -1,14 +1,13 @@
-import type { PollWithMetaList } from "$/server/services/pollService"
+import type { PollWithMeta } from "$/server/services/pollService"
 import { createStore } from "kaioken"
 
 export const usePollStore = createStore(
   {
-    polls: [] as PollWithMetaList,
+    polls: [] as PollWithMeta[],
   },
   (set) => ({
-    setPolls: (polls: PollWithMetaList) =>
-      set((state) => ({ ...state, polls })),
-    addPoll: (poll: PollWithMetaList[number]) =>
+    setPolls: (polls: PollWithMeta[]) => set((state) => ({ ...state, polls })),
+    addPoll: (poll: PollWithMeta) =>
       set((state) => ({ ...state, polls: [...state.polls, poll] })),
     deletePoll: (id: number) =>
       set((state) => ({
