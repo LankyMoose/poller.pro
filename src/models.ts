@@ -8,3 +8,6 @@ export const pollFormScheme = z.object({
 })
 
 export type PollFormScheme = z.infer<typeof pollFormScheme>
+
+export const pollVoteScheme = z.object({ pollOptionId: z.number() })
+export type PollVoteScheme = z.infer<typeof pollVoteScheme>

@@ -14,5 +14,10 @@ export const usePollStore = createStore(
         ...state,
         polls: state.polls.filter((p) => p.id !== id),
       })),
+    updatePoll: (poll: PollWithMeta) =>
+      set((state) => ({
+        ...state,
+        polls: state.polls.map((p) => (p.id === poll.id ? poll : p)),
+      })),
   })
 )

@@ -143,4 +143,13 @@ export const pollService = {
           : and(eq(polls.id, id), eq(polls.userId, userId))
       )
   },
+  async vote(pollId: number, userId: number, optionId: number) {
+    return db
+      .insert(pollVotes)
+      .values({ pollId, userId, optionId })
+      .onConflictDoUpdate({
+        target: [pollVotes.pollId, pollVotes.userId],
+        set: { optionId },
+      })
+  },
 }

@@ -6,6 +6,8 @@ import { PlusIcon } from "$/components/icons/PlusIcon"
 import { Button } from "$/components/atoms/Button"
 import { Modal } from "$/components/modal/Modal"
 import { NewPollForm } from "$/components/forms/NewPollForm"
+import { PollVoteScheme } from "$/models"
+import { PollWithMeta } from "$/server/services/pollService"
 
 export { Page }
 
@@ -67,10 +69,13 @@ function PollListDisplay() {
 }
 
 function PollCard({ id }: { id: number }) {
+  const [isVoting, setIsVoting] = useState(false)
   const { user } = usePageContext()
-  const { value: poll, deletePoll } = usePollStore((state) =>
-    state.polls.find((p) => p.id === id)
-  )
+  const {
+    value: poll,
+    deletePoll,
+    updatePoll,
+  } = usePollStore((state) => state.polls.find((p) => p.id === id))
   if (!poll) return null
 
   async function handleDelete() {
@@ -84,12 +89,43 @@ function PollCard({ id }: { id: number }) {
     }
   }
 
+  async function handleVote(pollOptionId: number) {
+    setIsVoting(true)
+    const _poll = poll as PollWithMeta
+    try {
+      const payload: PollVoteScheme = { pollOptionId }
+      const res = await fetch(`/api/polls/${id}/vote`, {
+        method: "POST",
+        body: JSON.stringify(payload),
+        headers: { "Content-Type": "application/json" },
+      })
+      if (!res.ok) throw new Error(res.statusText)
+      updatePoll({ ..._poll, userVote: pollOptionId })
+    } catch (error) {
+      console.error("handleVote err", error)
+    } finally {
+      setIsVoting(false)
+    }
+  }
+
   return (
     <div>
       <h4>{poll.text}</h4>
-      <ul>
+      <ul className="flex gap-2 flex-col mb-2">
         {poll.pollOptions.map((o) => (
-          <li>{o.text}</li>
+          <li className="flex">
+            <button
+              className="w-full bg-primary"
+              disabled={poll.userVote === o.id || isVoting}
+              onclick={() => handleVote(o.id)}
+            >
+              {o.text}
+
+              {poll.userVote === o.id && (
+                <div className="w-4 h-4 bg-white rounded-full">Voted</div>
+              )}
+            </button>
+          </li>
         ))}
       </ul>
       {(user?.isAdmin || user?.id === poll.user.id) && (

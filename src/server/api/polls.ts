@@ -29,6 +29,20 @@ export function configurePollRoutes(app: FastifyInstance) {
       return res.code(200).send(undefined)
     }
   )
+  app.zod.post(
+    "/api/polls/:id/vote",
+    {
+      operationId: "vote",
+      params: "pollIdScheme",
+      body: "pollVoteScheme",
+    },
+    async function (req, res) {
+      const user = getUser(req)
+      if (!user) throw { statusCode: 401, message: "Unauthorized" }
+      await pollService.vote(req.params.id, user.id, req.body.pollOptionId)
+      return res.code(200).send(undefined)
+    }
+  )
 }
 
 function getUser(request: FastifyRequest): UserModel | undefined {
