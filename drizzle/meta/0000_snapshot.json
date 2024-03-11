@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "id": "768f19b3-d582-4c0d-9852-f917bed87b5d",
+  "id": "ce70cbc6-a051-4d3f-a2c6-0d40e2a96b14",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "poll": {
@@ -353,12 +353,12 @@
         }
       },
       "indexes": {
-        "id_idx": {
-          "name": "id_idx",
+        "users_name_idx": {
+          "name": "users_name_idx",
           "columns": [
             "name"
           ],
-          "isUnique": true
+          "isUnique": false
         }
       },
       "foreignKeys": {},

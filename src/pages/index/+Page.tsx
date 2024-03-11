@@ -101,7 +101,25 @@ function PollCard({ id }: { id: number }) {
         headers: { "Content-Type": "application/json" },
       })
       if (!res.ok) throw new Error(res.statusText)
-      updatePoll({ ..._poll, userVote: pollOptionId })
+      let prevVote = _poll.userVote
+
+      const newVotes = _poll.pollVotes.map((v) =>
+        v.optionId === pollOptionId
+          ? { ...v, count: v.count + 1 }
+          : v.optionId === prevVote
+            ? { ...v, count: v.count - 1 }
+            : v
+      )
+
+      if (!newVotes.some((v) => v.optionId === pollOptionId)) {
+        newVotes.push({ count: 1, optionId: pollOptionId })
+      }
+
+      updatePoll({
+        ..._poll,
+        userVote: pollOptionId,
+        pollVotes: newVotes,
+      })
     } catch (error) {
       console.error("handleVote err", error)
     } finally {
@@ -129,8 +147,10 @@ function PollCard({ id }: { id: number }) {
               onclick={() => handleVote(o.id)}
             >
               {o.text}
-
               {poll.userVote === o.id && <CircleTickIcon />}
+              <span>
+                {poll.pollVotes.find((v) => v.optionId === o.id)?.count}
+              </span>
             </button>
           </li>
         ))}

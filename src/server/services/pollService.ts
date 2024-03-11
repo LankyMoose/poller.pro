@@ -8,8 +8,9 @@ import {
   users,
 } from "$/drizzle/tables"
 import { PollFormScheme } from "$/models"
-import { and, count, desc, eq } from "drizzle-orm"
+import { and, count, desc, eq, sql } from "drizzle-orm"
 import { db } from "./db"
+import { alias } from "drizzle-orm/sqlite-core"
 
 export type PollWithMeta = {
   id: number
@@ -25,17 +26,19 @@ export type PollWithMeta = {
     id: number
     text: string
   }[]
+  pollVotes: { count: number; optionId: number }[]
   userVote: number | null
 }
 
 type PartialPollWithMeta = Omit<PollWithMeta, "user" | "pollOptions"> & {
   user?: PollWithMeta["user"]
   pollOptions?: PollWithMeta["pollOptions"]
+  pollVotes?: PollWithMeta["pollVotes"]
 }
 
 export const pollService = {
   async getLatestPolls(user?: UserModel): Promise<PollWithMeta[]> {
-    console.log("getLatestPolls")
+    const userVotes = alias(pollVotes, "userVote")
     try {
       const res = await db
         .select({
@@ -52,17 +55,29 @@ export const pollService = {
             id: pollOptions.id,
             text: pollOptions.text,
           },
-          userVote: pollVotes.optionId,
+          userVote: userVotes.optionId,
+          pollVotes: {
+            count: sql<number>`count(${pollVotes.optionId})`.as("count"),
+            optionId: pollVotes.optionId,
+          },
         })
         .from(polls)
+        .leftJoin(pollVotes, eq(polls.id, pollVotes.pollId))
         .leftJoin(users, eq(polls.userId, users.id))
         .leftJoin(pollOptions, eq(polls.id, pollOptions.pollId))
         .leftJoin(
-          pollVotes,
+          userVotes,
           and(
-            eq(polls.id, pollVotes.pollId),
-            eq(pollVotes.userId, user?.id || -1)
+            eq(polls.id, userVotes.pollId),
+            eq(userVotes.userId, user?.id || -1)
           )
+        )
+        .groupBy(
+          polls.id,
+          users.id,
+          pollOptions.id,
+          userVotes.optionId,
+          pollVotes.optionId
         )
         .where(eq(polls.deleted, false))
         .orderBy(desc(polls.createdAt))
@@ -77,10 +92,12 @@ export const pollService = {
             closed: cur.closed,
             createdAt: cur.createdAt,
             userVote: cur.userVote,
+            pollVotes: [],
           }
 
           acc.push(poll)
         }
+
         if (!poll.user && cur.user) {
           poll.user = {
             id: cur.user.id,
@@ -88,8 +105,17 @@ export const pollService = {
             name: cur.user.name,
           }
         }
-        if (cur.pollOptions) {
+        if (
+          cur.pollOptions &&
+          !poll.pollOptions?.find((p) => p.id === cur.pollOptions?.id)
+        ) {
           poll.pollOptions = [...(poll.pollOptions || []), cur.pollOptions]
+        }
+        if (
+          cur.pollVotes &&
+          !poll.pollVotes?.find((p) => p.optionId === cur.pollVotes?.optionId)
+        ) {
+          poll.pollVotes = [...(poll.pollVotes || []), cur.pollVotes]
         }
         return acc
       }, [] as PartialPollWithMeta[])
@@ -100,17 +126,7 @@ export const pollService = {
       return []
     }
   },
-  async getPollVotes(pollId: number) {
-    return db
-      .select({
-        optionId: pollVotes.optionId,
-        count: count(pollVotes.optionId).as("count"),
-      })
-      .from(pollVotes)
-      .where(eq(pollVotes.pollId, pollId))
-      .groupBy(pollVotes.optionId)
-  },
-  async addPoll(poll: PollFormScheme, user: UserModel) {
+  async addPoll(poll: PollFormScheme, user: UserModel): Promise<PollWithMeta> {
     const { options, ...rest } = poll
 
     return await db.transaction(async (tx) => {
@@ -131,7 +147,13 @@ export const pollService = {
         .returning()
         .all()
 
-      return { ...poll, user, pollOptions: optionsRes }
+      return {
+        ...poll,
+        user,
+        pollOptions: optionsRes,
+        pollVotes: [],
+        userVote: null,
+      }
     })
   },
   async deletePoll(id: number, userId: number, isAdmin: boolean) {

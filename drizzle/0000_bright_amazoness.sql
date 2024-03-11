@@ -50,4 +50,4 @@ CREATE UNIQUE INDEX `unique_idx` ON `poll_vote` (`poll_id`,`user_id`);--> statem
 CREATE INDEX `user_auth_email_idx` ON `user_auth` (`email`);--> statement-breakpoint
 CREATE INDEX `user_auth_user_id_idx` ON `user_auth` (`user_id`);--> statement-breakpoint
 CREATE INDEX `user_auth_provider_id_idx` ON `user_auth` (`provider_id`);--> statement-breakpoint
-CREATE UNIQUE INDEX `id_idx` ON `user` (`name`);
+CREATE INDEX `users_name_idx` ON `user` (`name`);

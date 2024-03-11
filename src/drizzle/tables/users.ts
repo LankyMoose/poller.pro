@@ -1,12 +1,6 @@
 import { UTC } from "$/utils"
 import { relations } from "drizzle-orm"
-import {
-  text,
-  integer,
-  sqliteTable,
-  uniqueIndex,
-  index,
-} from "drizzle-orm/sqlite-core"
+import { text, integer, sqliteTable, index } from "drizzle-orm/sqlite-core"
 import { polls } from "./polls"
 import { pollVotes } from "./pollVotes"
 
@@ -23,7 +17,7 @@ const users = sqliteTable(
     createdAt: integer("created_at").notNull().$defaultFn(UTC.now),
     disabled: integer("disabled", { mode: "boolean" }).default(false),
   },
-  (users) => ({ nameIdx: uniqueIndex("id_idx").on(users.name) })
+  (users) => ({ nameIdx: index("users_name_idx").on(users.name) })
 )
 
 type UserModel = typeof users.$inferSelect
