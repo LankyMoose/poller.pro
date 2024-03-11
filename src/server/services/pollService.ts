@@ -11,6 +11,7 @@ import { PollFormScheme } from "$/models"
 import { and, count, desc, eq, sql } from "drizzle-orm"
 import { db } from "./db"
 import { alias } from "drizzle-orm/sqlite-core"
+import { broadcastUpdate } from "../socket"
 
 export type PollWithMeta = {
   id: number
@@ -179,12 +180,27 @@ export const pollService = {
       )
   },
   async vote(pollId: number, userId: number, optionId: number) {
-    return db
+    await db
       .insert(pollVotes)
       .values({ pollId, userId, optionId })
       .onConflictDoUpdate({
         target: [pollVotes.pollId, pollVotes.userId],
         set: { optionId },
       })
+      .run()
+
+    const newVoteCounts = await db
+      .select({ id: pollVotes.optionId, count: count(pollVotes.id) })
+      .from(pollVotes)
+      .where(and(eq(pollVotes.pollId, pollId)))
+      .groupBy(pollVotes.optionId)
+      .all()
+    if (!newVoteCounts) return console.error("vote err")
+
+    broadcastUpdate(pollId.toString(), {
+      type: "~voteCounts",
+      pollId,
+      votes: newVoteCounts,
+    })
   },
 }

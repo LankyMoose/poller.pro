@@ -1,11 +1,17 @@
 import { FastifyInstance, FastifyRequest } from "fastify"
 import { pollService } from "../services/pollService"
 import { UserModel } from "$/drizzle/tables"
+import { subscribeToPolls } from "../socket"
 
 export function configurePollRoutes(app: FastifyInstance) {
   app.get("/api/polls", async function (request) {
     const user = getUser(request)
-    return pollService.getLatestPolls(user)
+    const res = await pollService.getLatestPolls(user)
+    subscribeToPolls(
+      request,
+      res.map((p) => p.id.toString())
+    )
+    return res
   })
   app.zod.post(
     "/api/polls",

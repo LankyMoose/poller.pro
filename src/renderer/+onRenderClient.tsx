@@ -3,6 +3,17 @@ import type { OnRenderClientAsync } from "vike/types"
 import { hydrate } from "kaioken/ssr"
 import { getTitle } from "./utils"
 import { App } from "./App"
+import { type LiveSocket, createLiveSocket } from "$/liveSocket"
+
+declare global {
+  interface Window {
+    liveSocket: LiveSocket
+  }
+}
+
+if (typeof window !== "undefined") {
+  window.liveSocket = createLiveSocket()
+}
 
 export const onRenderClient: OnRenderClientAsync = async (pageContext) => {
   const container = document.getElementById("page-root")!

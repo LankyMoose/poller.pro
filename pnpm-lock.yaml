@@ -42,8 +42,8 @@ dependencies:
     specifier: ^1.4.0
     version: 1.4.0(fastify@4.26.2)
   kaioken:
-    specifier: ^0.10.0
-    version: 0.10.0
+    specifier: ^0.10.1
+    version: 0.10.1
   sirv:
     specifier: ^2.0.4
     version: 2.0.4
@@ -2203,8 +2203,8 @@ packages:
     resolution: {integrity: sha512-NM8/P9n3XjXhIZn1lLhkFaACTOURQXjWhV4BA/RnOv8xvgqtqpAX9IO4mRQxSx1Rlo4tqzeqb0sOlruaOy3dug==}
     dev: false
 
-  /kaioken@0.10.0:
-    resolution: {integrity: sha512-C27eZ+YkrvzOqCDXX0YzSIBZhk376ymthdLYEMw8K5L/T5milrafGAQka0MACLptGaXZR/e4iI0+NhZW2p6Pzg==}
+  /kaioken@0.10.1:
+    resolution: {integrity: sha512-j+qFqa1MVOfBuXq8Oe9QhGN5BIUA9HG83dfRg3vVg7TNQgPllRB8FkU9NSAXOoz5Z4s1Nc6PAgtG9k5HIESAGw==}
     dev: false
 
   /libsql@0.3.8:

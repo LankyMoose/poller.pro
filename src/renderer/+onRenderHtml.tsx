@@ -8,7 +8,6 @@ import { App } from "./App"
 export const onRenderHtml: OnRenderHtmlAsync = async (
   pageContext
 ): ReturnType<OnRenderHtmlAsync> => {
-  console.log("onRenderHtml")
   const pageHtml = renderToString(App, { pageContext })
   return escapeInject`<!DOCTYPE html>
     <html>

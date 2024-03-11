@@ -9,6 +9,7 @@ import { NewPollForm } from "$/components/forms/NewPollForm"
 import { PollVoteScheme } from "$/models"
 import { PollWithMeta } from "$/server/services/pollService"
 import { CircleTickIcon } from "$/components/icons/CircleTickIcon"
+import { useAuthModal } from "$/stores/authModalStore"
 
 export { Page }
 
@@ -47,7 +48,6 @@ function PollListDisplay() {
     fetch("/api/polls")
       .then((res) => res.json())
       .then((data) => {
-        console.log({ data })
         setPolls(data)
         setLoading(false)
       })
@@ -71,12 +71,14 @@ function PollListDisplay() {
 
 function PollCard({ id }: { id: number }) {
   const [isVoting, setIsVoting] = useState(false)
+  const { setOpen } = useAuthModal()
   const { user } = usePageContext()
   const {
     value: poll,
     deletePoll,
     updatePoll,
   } = usePollStore((state) => state.polls.find((p) => p.id === id))
+
   if (!poll) return null
 
   async function handleDelete() {
@@ -91,6 +93,9 @@ function PollCard({ id }: { id: number }) {
   }
 
   async function handleVote(pollOptionId: number) {
+    if (!user) {
+      return setOpen(true)
+    }
     setIsVoting(true)
     const _poll = poll as PollWithMeta
     try {

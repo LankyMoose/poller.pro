@@ -4,6 +4,7 @@ import fastify from "fastify"
 import cookie from "@fastify/cookie"
 import compress from "@fastify/compress"
 import fStatic from "@fastify/static"
+import fWebsocket from "@fastify/websocket"
 import { OAuth2Namespace } from "@fastify/oauth2"
 import { FastifyZod, buildJsonSchemas, register } from "fastify-zod"
 import * as models from "$/models"
@@ -12,6 +13,7 @@ import { env } from "./env"
 import { configureAuthRoutes } from "./api/auth"
 import { configurePollRoutes } from "./api/polls"
 import { UserModel } from "$/drizzle/tables"
+import { socketHandler } from "./socket"
 
 declare module "fastify" {
   export interface FastifyInstance {
@@ -31,6 +33,7 @@ const root = process.cwd()
 async function startServer() {
   const app = fastify()
     .register(cookie)
+    .register(fWebsocket, { options: { maxPayload: 0 } })
     .register(compress, { global: true })
     .setErrorHandler(function (error, _, reply) {
       // Log error
@@ -41,6 +44,27 @@ async function startServer() {
         .status(error.statusCode ?? 500)
         .send({ message: error.message ?? "Internal Server Error" })
     })
+
+  app.addHook("onRequest", async (req, res) => {
+    if (!req.cookies["user_anon_id"]) {
+      res.setCookie("user_anon_id", crypto.randomUUID(), {
+        domain: env.host || "localhost",
+        path: "/",
+        sameSite: "lax",
+        httpOnly: true,
+        secure: env.isProduction,
+      })
+    }
+  })
+
+  app.register(async function () {
+    app.route({
+      method: "GET",
+      url: "/ws",
+      handler: (_, res) => res.status(400).send(),
+      wsHandler: socketHandler,
+    })
+  })
 
   await register(app, {
     jsonSchemas: buildJsonSchemas(models),

@@ -4,6 +4,7 @@ import { Modal } from "./modal/Modal"
 import { GoogleIcon } from "./icons/auth/GoogleIcon"
 import { Avatar } from "./Avatar"
 import { UserModel } from "$/drizzle/tables"
+import { useAuthModal } from "$/stores/authModalStore"
 
 export function UserAuth() {
   const { user } = usePageContext()
@@ -71,14 +72,17 @@ function UserDisplay({ user }: { user: UserModel }) {
 }
 
 function AuthModal() {
-  const [modalOpen, setModalOpen] = useState(false)
+  const {
+    value: { open },
+    setOpen,
+  } = useAuthModal()
 
   return (
     <>
-      <button onclick={() => setModalOpen(true)} className="text-xs underline">
+      <button onclick={() => setOpen(true)} className="text-xs underline">
         Log in
       </button>
-      <Modal open={modalOpen} close={() => setModalOpen(false)}>
+      <Modal open={open} close={() => setOpen(false)}>
         <h4 className="text-lg font-bold text-center">Log in</h4>
         <br />
         <div>
