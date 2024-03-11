@@ -25,15 +25,15 @@ export type PollWithMeta = {
   pollOptions: {
     id: number
     text: string
+    count: number
   }[]
-  pollVotes: { count: number; optionId: number }[]
   userVote: number | null
 }
 
 type PartialPollWithMeta = Omit<PollWithMeta, "user" | "pollOptions"> & {
   user?: PollWithMeta["user"]
   pollOptions?: PollWithMeta["pollOptions"]
-  pollVotes?: PollWithMeta["pollVotes"]
+  pollVotes?: { count: number; optionId: number }[]
 }
 
 export const pollService = {
@@ -109,7 +109,10 @@ export const pollService = {
           cur.pollOptions &&
           !poll.pollOptions?.find((p) => p.id === cur.pollOptions?.id)
         ) {
-          poll.pollOptions = [...(poll.pollOptions || []), cur.pollOptions]
+          poll.pollOptions = [
+            ...(poll.pollOptions || []),
+            { ...cur.pollOptions, count: 0 },
+          ]
         }
         if (
           cur.pollVotes &&
@@ -120,7 +123,14 @@ export const pollService = {
         return acc
       }, [] as PartialPollWithMeta[])
 
-      return mapped as PollWithMeta[]
+      return mapped.map((poll) => {
+        const { pollVotes, ...rest } = poll
+        poll.pollOptions?.forEach((pollOption) => {
+          pollOption.count =
+            pollVotes?.find((v) => v.optionId === pollOption.id)?.count || 0
+        })
+        return rest
+      }) as PollWithMeta[]
     } catch (error) {
       console.error("getLatestPolls err", error)
       return []
@@ -150,8 +160,11 @@ export const pollService = {
       return {
         ...poll,
         user,
-        pollOptions: optionsRes,
-        pollVotes: [],
+        pollOptions: optionsRes.map((o) => ({
+          id: o.id,
+          text: o.text,
+          count: 0,
+        })),
         userVote: null,
       }
     })
