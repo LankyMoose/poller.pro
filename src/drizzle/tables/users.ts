@@ -17,9 +17,6 @@ const users = sqliteTable(
   "user",
   {
     id: integer("id").primaryKey(),
-    webId: text("web_id")
-      .notNull()
-      .$default(() => crypto.randomUUID()),
     name: text("name").notNull(),
     avatarUrl: text("avatar_url"),
     isAdmin: integer("is_admin", { mode: "boolean" }).default(false),

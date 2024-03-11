@@ -1,19 +1,14 @@
-import { useRef, type TransitionState, useEffect } from "kaioken"
+import { useRef, useEffect, Transition } from "kaioken"
 import { ModalBackdrop } from "./ModalBackdrop"
 import "./Modal.css"
 
 type ModalProps = {
-  state: TransitionState
+  open: boolean
   close: () => void
-  children?: JSX.Element[]
 }
 
-export function Modal({ state, close, children }: ModalProps) {
+export const Modal: Kaioken.FC<ModalProps> = ({ open, close, children }) => {
   const wrapperRef = useRef<HTMLDivElement>(null)
-  if (state == "exited") return null
-  const opacity = state === "entered" ? "1" : "0"
-  const scale = state === "entered" ? 1 : 0.85
-  const translateY = state === "entered" ? -50 : -25
 
   useEffect(() => {
     window.addEventListener("keyup", handleKeyPress)
@@ -23,25 +18,37 @@ export function Modal({ state, close, children }: ModalProps) {
   function handleKeyPress(e: KeyboardEvent) {
     if (e.key === "Escape") {
       e.preventDefault()
-      if (state === "exited") return
-      close()
+      if (open) close()
     }
   }
 
   return (
-    <ModalBackdrop
-      ref={wrapperRef}
-      onclick={(e) => e.target === wrapperRef.current && close()}
-      style={{ opacity }}
-    >
-      <div
-        className="modal-content p-4"
-        style={{
-          transform: `translate(-50%, ${translateY}%) scale(${scale})`,
-        }}
-      >
-        {children}
-      </div>
-    </ModalBackdrop>
+    <Transition
+      in={open}
+      timings={[70, 150, 150, 150]}
+      element={(state) => {
+        if (state == "exited") return null
+        const opacity = state === "entered" ? "1" : "0"
+        const scale = state === "entered" ? 1 : 0.85
+        const translateY = state === "entered" ? -50 : -100
+
+        return (
+          <ModalBackdrop
+            ref={wrapperRef}
+            onclick={(e) => e.target === wrapperRef.current && close()}
+            style={{ opacity }}
+          >
+            <div
+              className="modal-content p-4"
+              style={{
+                transform: `translate(-50%, ${translateY}%) scale(${scale})`,
+              }}
+            >
+              {children}
+            </div>
+          </ModalBackdrop>
+        )
+      }}
+    />
   )
 }

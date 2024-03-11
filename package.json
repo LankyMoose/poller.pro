@@ -20,7 +20,7 @@
     "prettier": "^3.2.5",
     "tailwindcss": "^3.4.1",
     "typescript": "^5.4.2",
-    "vite-plugin-kaioken": "^0.0.6"
+    "vite-plugin-kaioken": "^0.0.7"
   },
   "dependencies": {
     "@fastify/compress": "^7.0.0",
@@ -34,10 +34,12 @@
     "dotenv": "^16.4.5",
     "drizzle-orm": "^0.30.1",
     "fastify": "^4.26.2",
-    "kaioken": "^0.9.6",
+    "fastify-zod": "^1.4.0",
+    "kaioken": "^0.10.0",
     "sirv": "^2.0.4",
     "tsx": "^4.7.1",
     "vike": "^0.4.165",
-    "vite": "^5.1.5"
+    "vite": "^5.1.5",
+    "zod": "^3.22.4"
   }
 }

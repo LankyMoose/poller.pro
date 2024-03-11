@@ -6,19 +6,13 @@
 
 :root {
   color-scheme: light dark;
-  background-color: #1e1e1e;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
+  color: #213547;
+  background-color: #ffffff;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -45,4 +39,13 @@ body {
 
 a {
   text-decoration: none;
+}
+
+button[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+input {
+  font-size: .85rem;
 }

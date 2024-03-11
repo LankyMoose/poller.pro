@@ -3,7 +3,7 @@ import { Transition, useEffect, useRef, useState } from "kaioken"
 import { Modal } from "./modal/Modal"
 import { GoogleIcon } from "./icons/auth/GoogleIcon"
 import { Avatar } from "./Avatar"
-import { PublicUser } from "$/types"
+import { UserModel } from "$/drizzle/tables"
 
 export function UserAuth() {
   const { user } = usePageContext()
@@ -11,7 +11,7 @@ export function UserAuth() {
   return user ? <UserDisplay user={user} /> : <AuthModal />
 }
 
-function UserDisplay({ user }: { user: PublicUser }) {
+function UserDisplay({ user }: { user: UserModel }) {
   const { isClient } = usePageContext()
   const [open, setOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
@@ -78,19 +78,13 @@ function AuthModal() {
       <button onclick={() => setModalOpen(true)} className="text-xs underline">
         Log in
       </button>
-      <Transition
-        in={modalOpen}
-        timings={[70, 150, 150, 150]}
-        element={(state) => (
-          <Modal state={state} close={() => setModalOpen(false)}>
-            <h4 className="text-lg font-bold text-center">Log in</h4>
-            <br />
-            <div>
-              <AuthModalProviderList />
-            </div>
-          </Modal>
-        )}
-      />
+      <Modal open={modalOpen} close={() => setModalOpen(false)}>
+        <h4 className="text-lg font-bold text-center">Log in</h4>
+        <br />
+        <div>
+          <AuthModalProviderList />
+        </div>
+      </Modal>
     </>
   )
 }

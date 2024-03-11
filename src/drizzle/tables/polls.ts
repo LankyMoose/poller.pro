@@ -13,9 +13,6 @@ const polls = sqliteTable(
   "poll",
   {
     id: integer("id").primaryKey(),
-    webId: text("web_id")
-      .notNull()
-      .$default(() => crypto.randomUUID()),
     userId: integer("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),

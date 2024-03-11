@@ -1,6 +1,6 @@
 //https://vike.dev/pageContext#custom
 
-import { PublicUser } from "$/types"
+import { UserModel } from "$/drizzle/tables"
 
 declare global {
   namespace Vike {
@@ -23,7 +23,7 @@ declare global {
 
       data: Record<string, unknown>
 
-      user: PublicUser | null
+      user: UserModel | null
     }
   }
 }

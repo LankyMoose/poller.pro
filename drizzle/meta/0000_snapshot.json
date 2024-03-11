@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "id": "10f926d4-ddeb-40ec-aac6-2a050e17540f",
+  "id": "768f19b3-d582-4c0d-9852-f917bed87b5d",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "poll": {
@@ -11,13 +11,6 @@
           "name": "id",
           "type": "integer",
           "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "web_id": {
-          "name": "web_id",
-          "type": "text",
-          "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
@@ -321,13 +314,6 @@
           "notNull": true,
           "autoincrement": false
         },
-        "web_id": {
-          "name": "web_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
         "name": {
           "name": "name",
           "type": "text",
@@ -347,7 +333,8 @@
           "type": "integer",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false
+          "autoincrement": false,
+          "default": false
         },
         "created_at": {
           "name": "created_at",

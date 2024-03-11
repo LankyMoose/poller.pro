@@ -1,14 +1,17 @@
 // https://github.com/royalswe/vike-fastify-boilerplate/blob/main/server/index.ts
+import { renderPage } from "vike/server"
 import fastify from "fastify"
 import cookie from "@fastify/cookie"
 import compress from "@fastify/compress"
 import fStatic from "@fastify/static"
-
-import { renderPage } from "vike/server"
-import { env } from "./env"
 import { OAuth2Namespace } from "@fastify/oauth2"
+import { FastifyZod, buildJsonSchemas, register } from "fastify-zod"
+import * as models from "$/models"
+
+import { env } from "./env"
 import { configureAuthRoutes } from "./api/auth"
-import { PublicUser } from "$/types"
+import { configurePollRoutes } from "./api/polls"
+import { UserModel } from "$/drizzle/tables"
 
 declare module "fastify" {
   export interface FastifyInstance {
@@ -16,6 +19,7 @@ declare module "fastify" {
       (request: FastifyRequest, reply: FastifyReply): Promise<void>
     }
     googleOAuth2: OAuth2Namespace
+    readonly zod: FastifyZod<typeof models>
   }
   interface Session {
     authCallback: string
@@ -37,6 +41,10 @@ async function startServer() {
         .status(error.statusCode ?? 500)
         .send({ message: error.message ?? "Internal Server Error" })
     })
+
+  await register(app, {
+    jsonSchemas: buildJsonSchemas(models),
+  })
 
   if (env.isProduction) {
     app.register(fStatic, {
@@ -69,13 +77,14 @@ async function startServer() {
   })
 
   configureAuthRoutes(app)
+  configurePollRoutes(app)
 
   app.get("*", async (request, reply) => {
     const reqUser = request.cookies["user"]
 
     const pageContextInit = {
       urlOriginal: request.raw.url || "",
-      user: reqUser ? (JSON.parse(reqUser) as PublicUser) : null,
+      user: reqUser ? (JSON.parse(reqUser) as UserModel) : null,
     }
     const pageContext = await renderPage(pageContextInit)
     const { httpResponse } = pageContext

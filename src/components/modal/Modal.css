@@ -18,6 +18,12 @@
   z-index: 1000;
   max-width: calc(100% - 2rem);
   border-radius: 5px;
-  background-color: #222;
+  background-color: #fafafa;
   transition: transform 150ms ease-in-out;
+}
+
+@media (prefers-color-scheme: dark) {
+  .modal-content {
+    background-color: #1e1e1e;
+  }
 }
