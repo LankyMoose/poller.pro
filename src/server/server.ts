@@ -103,7 +103,6 @@ async function startServer() {
   configurePollRoutes(app)
 
   app.get("*", async (request, reply) => {
-    console.log("req", request.raw.url)
     const reqUser = request.cookies["user"]
 
     const pageContextInit = {
