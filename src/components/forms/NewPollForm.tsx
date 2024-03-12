@@ -100,7 +100,7 @@ export function NewPollForm({ close }: { close: () => void }) {
           <div className="mb-2">
             <div className="flex flex-col gap-2 mt-2" ref={optionsContainerRef}>
               {options.map((o, i) => (
-                <div className="option-item border bg-neutral-100 dark:bg-neutral-800 relative rounded flex justify-between items-center">
+                <div className="option-item border bg-neutral-800 relative rounded flex justify-between items-center">
                   <Input
                     minLength={pollFormReqs.optionText.min}
                     maxLength={pollFormReqs.optionText.max}

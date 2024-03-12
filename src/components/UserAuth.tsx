@@ -57,7 +57,7 @@ function UserDisplay({ user }: { user: UserModel }) {
           const opacity = state === "entered" ? "1" : "0"
           return (
             <div
-              className="absolute top-full flex flex-col w-auto transition-all rounded border text-center bg-neutral-100 dark:bg-neutral-800 shadow shadow-[#111a]"
+              className="absolute top-full flex flex-col w-auto transition-all rounded border text-center bg-neutral-800 shadow shadow-[#111a]"
               style={{ opacity }}
             >
               <a href="/logout" className="py-1 px-2 text-nowrap">

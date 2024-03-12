@@ -5,27 +5,20 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: light dark;
+  color-scheme: dark;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
-  color: #213547;
-  background-color: #ffffff;
+  color: #ffffff;
+  background-color: #1e1e1e;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    color: #ffffff;
-    background-color: #1e1e1e;
-  }
-
-  *,
-  ::before,
-  ::after {
-    border-color: #555;
-  }
+*,
+::before,
+::after {
+  border-color: #555;
 }
 
 body {
@@ -42,7 +35,7 @@ a {
 }
 
 button[disabled] {
-  opacity: 0.5;
+  opacity: 0.65;
   cursor: not-allowed;
 }
 

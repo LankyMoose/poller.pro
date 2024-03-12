@@ -6,9 +6,10 @@ export default {
   ],
   theme: {
     extend: {
-      backgroundColor: {
+      colors: {
         primary: "rgb(220, 20, 60)",
         "primary-light": "rgb(228 50 86)",
+        "primary-dark": "rgb(165 25 53)",
       },
     },
   },

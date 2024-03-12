@@ -8,7 +8,8 @@
     "build": "vite build",
     "preview": "set NODE_ENV=production&& tsx ./src/server/server.ts",
     "db:create-migration": "pnpm drizzle-kit generate:sqlite",
-    "db:migrate": "pnpm tsx ./src/drizzle/migrate.ts"
+    "db:migrate": "pnpm tsx ./src/drizzle/migrate.ts",
+    "db:studio": "pnpm drizzle-kit studio"
   },
   "keywords": [],
   "author": "",

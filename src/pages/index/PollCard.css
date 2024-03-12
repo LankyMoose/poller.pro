@@ -1,0 +1,8 @@
+.w-percent {
+  transition: width 500ms ease-in-out;
+  width: var(--percent);
+}
+
+.poll-option {
+  opacity: 1 !important;
+}

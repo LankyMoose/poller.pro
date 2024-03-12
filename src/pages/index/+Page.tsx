@@ -11,6 +11,7 @@ import { PollWithMeta } from "$/server/services/pollService"
 import { CircleTickIcon } from "$/components/icons/CircleTickIcon"
 import { useAuthModal } from "$/stores/authModalStore"
 import { Avatar } from "$/components/Avatar"
+import "./PollCard.css"
 
 export { Page }
 
@@ -92,7 +93,6 @@ function PollCard({ id, numPolls }: { id: number; numPolls: number }) {
     window.liveSocket.send({ type: "+sub", id: poll.id })
     return () => window.liveSocket.send({ type: "-sub", id: poll.id })
   }, [])
-  if (!poll) return null
 
   async function handleDelete() {
     if (!confirm("Are you sure you want to delete this poll?")) return
@@ -132,12 +132,22 @@ function PollCard({ id, numPolls }: { id: number; numPolls: number }) {
     }
   }
 
+  if (!poll) return null
+
+  const totalVotes = poll.pollOptions.reduce((a, b) => a + b.count, 0)
+  const percentages = poll.pollOptions.map((o) => ({
+    id: o.id,
+    percentage: o.count === 0 ? 0 : Math.round((o.count / totalVotes) * 100),
+  }))
+
   return (
     <div
-      className={`border p-2 rounded w-full ${numPolls > 1 ? "sm:w-[calc(50%-0.5rem)]" : ""} h-fit bg-neutral-100 dark:bg-neutral-800`}
+      className={`border p-2 rounded w-full ${numPolls > 1 ? "sm:w-[calc(50%-0.5rem)]" : ""} h-fit bg-neutral-800`}
     >
       <h4 className="font-bold mb-2 flex items-center justify-between ">
-        {poll.text}{" "}
+        <span>
+          {poll.text} <sup>({totalVotes} votes)</sup>
+        </span>
         {(user?.isAdmin || user?.id === poll.user.id) && (
           <Button
             variant="link"
@@ -152,15 +162,15 @@ function PollCard({ id, numPolls }: { id: number; numPolls: number }) {
       <ul className="flex gap-2 flex-col mb-2">
         {poll.pollOptions.map((o) => (
           <li className="flex">
-            <button
-              className="w-full p-2 rounded bg-primary flex justify-between items-center text-white"
-              disabled={poll.userVote === o.id || isVoting}
-              onclick={() => handleVote(o.id)}
-            >
-              {o.text}
-              {poll.userVote === o.id && <CircleTickIcon />}
-              <span>{o.count}</span>
-            </button>
+            <PollOptionButton
+              option={o}
+              percentage={
+                percentages.find((p) => p.id === o.id)?.percentage || 0
+              }
+              userVote={poll.userVote}
+              handleVote={handleVote}
+              isVoting={isVoting}
+            />
           </li>
         ))}
       </ul>
@@ -175,6 +185,44 @@ function PollCard({ id, numPolls }: { id: number; numPolls: number }) {
         </span>
       </div>
     </div>
+  )
+}
+
+function PollOptionButton({
+  option,
+  percentage,
+  userVote,
+  handleVote,
+  isVoting,
+}: {
+  option: PollWithMeta["pollOptions"][number]
+  percentage: number
+  userVote: number | null
+  handleVote: (pollOptionId: number) => void
+  isVoting: boolean
+}) {
+  const isSelected = userVote === option.id
+
+  return (
+    <button
+      className={`w-full rounded border-2 ${isSelected ? "border-primary" : "border-primary-dark"} bg-black bg-opacity-15 relative poll-option`}
+      disabled={isSelected || isVoting}
+      onclick={() => handleVote(option.id)}
+    >
+      <div
+        className={`absolute h-full ${isSelected ? "bg-primary" : "bg-primary-dark"} left-0 w-percent`}
+        style={`--percent: ${userVote === null ? 100 : percentage}%`}
+      />
+      <div className="w-full p-2 flex justify-between items-center text-white relative z-10">
+        {option.text}
+        {userVote !== null && <span>{percentage}%</span>}
+      </div>
+      {isSelected && (
+        <div className="absolute h-full w-full flex items-center justify-center pointer-events-none left-0 top-0">
+          <CircleTickIcon />
+        </div>
+      )}
+    </button>
   )
 }
 
