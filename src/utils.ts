@@ -1,5 +1,8 @@
 export const UTC = {
   now: () => Math.floor(Date.now() / 1000),
+  toLocaleString(date: number) {
+    return new Date(date * 1000).toLocaleString()
+  },
 }
 
 export function trapFocus(element: Element, e: KeyboardEvent) {
