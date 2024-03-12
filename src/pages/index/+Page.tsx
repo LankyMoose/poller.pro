@@ -82,6 +82,7 @@ function PollCard({ id }: { id: number }) {
   if (!poll) return null
 
   async function handleDelete() {
+    if (!confirm("Are you sure you want to delete this poll?")) return
     try {
       const res = await fetch(`/api/polls/${id}`, { method: "DELETE" })
       if (res.ok) {
@@ -133,7 +134,11 @@ function PollCard({ id }: { id: number }) {
       <h4 className="font-bold mb-2 flex items-center justify-between ">
         {poll.text}{" "}
         {(user?.isAdmin || user?.id === poll.user.id) && (
-          <Button variant="danger" onclick={handleDelete}>
+          <Button
+            variant="link"
+            className="text-red-500"
+            onclick={handleDelete}
+          >
             Delete
           </Button>
         )}
@@ -143,7 +148,7 @@ function PollCard({ id }: { id: number }) {
         {poll.pollOptions.map((o) => (
           <li className="flex">
             <button
-              className="w-full p-2 bg-purple-500 flex justify-between items-center text-white"
+              className="w-full p-2 rounded bg-primary flex justify-between items-center text-white"
               disabled={poll.userVote === o.id || isVoting}
               onclick={() => handleVote(o.id)}
             >
