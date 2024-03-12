@@ -1,19 +1,13 @@
 import { FastifyInstance, FastifyRequest } from "fastify"
 import { pollService } from "../services/pollService"
 import { UserModel } from "$/drizzle/tables"
-import { subscribeToPolls } from "../socket"
 import { pollFormScheme, pollIdScheme, pollVoteScheme } from "$/models"
 import { ZodTypeProvider } from "fastify-type-provider-zod"
 
 export function configurePollRoutes(app: FastifyInstance) {
   app.get("/api/polls", async function (request) {
     const user = getUser(request)
-    const res = await pollService.getLatestPolls(user)
-    subscribeToPolls(
-      request,
-      res.map((p) => p.id.toString())
-    )
-    return res
+    return pollService.getLatestPolls(user)
   })
   app
     .withTypeProvider<ZodTypeProvider>()

@@ -1,5 +1,5 @@
 import { usePollStore } from "./stores/pollStore"
-import { WebsocketMessage } from "./types"
+import { WebsocketClientMessage, WebsocketServerMessage } from "./types"
 
 export class LiveSocket {
   socket: WebSocket
@@ -23,7 +23,11 @@ export class LiveSocket {
     }
   }
 
-  private handleMessage(message: WebsocketMessage) {
+  send(message: WebsocketClientMessage) {
+    this.socket.send(JSON.stringify(message))
+  }
+
+  private handleMessage(message: WebsocketServerMessage) {
     switch (message.type) {
       case "+polls":
         break

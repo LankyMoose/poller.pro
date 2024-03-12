@@ -25,11 +25,9 @@ declare module "fastify" {
       (request: FastifyRequest, reply: FastifyReply): Promise<void>
     }
     googleOAuth2: OAuth2Namespace
-    // readonly zod: FastifyZod<typeof models>
   }
-  interface Session {
-    authCallback: string
-    id?: number
+  export interface Session {
+    anonId: string
   }
 }
 
@@ -39,7 +37,14 @@ async function startServer() {
     .setValidatorCompiler(validatorCompiler)
     .setSerializerCompiler(serializerCompiler)
     .register(cookie)
-    .register(fWebsocket, { options: { maxPayload: 0 } })
+    .register(fWebsocket, {
+      errorHandler(error, connection) {
+        connection.destroy(error)
+      },
+      options: {
+        maxPayload: 64,
+      },
+    })
     .register(compress, { global: true })
     .setErrorHandler(function (error, _, reply) {
       // Log error
@@ -50,25 +55,14 @@ async function startServer() {
         .status(error.statusCode ?? 500)
         .send({ message: error.message ?? "Internal Server Error" })
     })
-    .addHook("onRequest", async (req, res) => {
-      if (!req.cookies["user_anon_id"]) {
-        res.setCookie("user_anon_id", crypto.randomUUID(), {
-          domain: env.host || "localhost",
-          path: "/",
-          sameSite: "lax",
-          httpOnly: true,
-          secure: env.isProduction,
-        })
-      }
-    })
-
-  app.register(async function () {
+  app.register(function (app, opts, done) {
     app.route({
       method: "GET",
       url: "/ws",
       handler: (_, res) => res.status(400).send(),
       wsHandler: socketHandler,
     })
+    done()
   })
 
   // await register(app, {

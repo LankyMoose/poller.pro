@@ -1,4 +1,4 @@
-export type WebsocketMessage =
+export type WebsocketServerMessage =
   | { type: "+polls"; count: number }
   | { type: "-poll"; id: number }
   | {
@@ -6,4 +6,9 @@ export type WebsocketMessage =
       pollId: number
       votes: { id: number; count: number }[]
     }
+  | { type: "ping" }
+
+export type WebsocketClientMessage =
+  | { type: "+sub"; id: number }
+  | { type: "-sub"; id: number }
   | { type: "ping" }

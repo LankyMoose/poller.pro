@@ -79,6 +79,11 @@ function PollCard({ id }: { id: number }) {
     updatePoll,
   } = usePollStore((state) => state.polls.find((p) => p.id === id))
 
+  useEffect(() => {
+    if (!poll) return
+    window.liveSocket.send({ type: "+sub", id: poll.id })
+    return () => window.liveSocket.send({ type: "-sub", id: poll.id })
+  }, [])
   if (!poll) return null
 
   async function handleDelete() {
@@ -107,20 +112,10 @@ function PollCard({ id }: { id: number }) {
         headers: { "Content-Type": "application/json" },
       })
       if (!res.ok) throw new Error(res.statusText)
-      let prevVote = _poll.userVote
-
-      const pollOptions = _poll.pollOptions.map((v) =>
-        v.id === pollOptionId
-          ? { ...v, count: v.count + 1 }
-          : v.id === prevVote
-            ? { ...v, count: v.count - 1 }
-            : v
-      )
 
       updatePoll({
-        ..._poll,
+        id: _poll.id,
         userVote: pollOptionId,
-        pollOptions,
       })
     } catch (error) {
       console.error("handleVote err", error)
