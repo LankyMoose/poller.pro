@@ -109,6 +109,7 @@ export const authService = {
           break
         case AuthProvider.Github:
           url = "https://api.github.com/user"
+          break
         default:
           throw `Unsupported Auth Provider "${provider}"`
       }
