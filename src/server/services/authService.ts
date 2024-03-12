@@ -16,6 +16,7 @@ export type AuthCallbackState = Record<string, unknown>
 
 export enum AuthProvider {
   Google = "google",
+  Github = "github",
 }
 
 export type ProviderInfo<T extends AuthProvider> = T extends AuthProvider.Google
@@ -25,7 +26,14 @@ export type ProviderInfo<T extends AuthProvider> = T extends AuthProvider.Google
       id: string
       email: string
     }
-  : never
+  : T extends AuthProvider.Github
+    ? {
+        login: string
+        avatar_url: string
+        id: string
+        email: string
+      }
+    : never
 
 export const authService = {
   async getByProviderId(
@@ -106,6 +114,8 @@ export const authService = {
         case AuthProvider.Google:
           url = "https://www.googleapis.com/oauth2/v2/userinfo"
           break
+        case AuthProvider.Github:
+          url = "https://api.github.com/user"
         default:
           throw "Unsupported Auth Provider"
       }
@@ -134,6 +144,11 @@ export const authService = {
         const { name, picture, id, email } =
           info as ProviderInfo<AuthProvider.Google>
         return { name, picture, providerId: id, email }
+      }
+      case AuthProvider.Github: {
+        const { login, avatar_url, id, email } =
+          info as ProviderInfo<AuthProvider.Github>
+        return { name: login, picture: avatar_url, providerId: id, email }
       }
       default:
         throw "Unsupported Auth Provider"

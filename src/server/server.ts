@@ -25,6 +25,7 @@ declare module "fastify" {
       (request: FastifyRequest, reply: FastifyReply): Promise<void>
     }
     googleOAuth2: OAuth2Namespace
+    githubOAuth2: OAuth2Namespace
   }
   export interface Session {
     anonId: string

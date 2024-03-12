@@ -5,6 +5,7 @@ import { GoogleIcon } from "./icons/auth/GoogleIcon"
 import { Avatar } from "./Avatar"
 import { UserModel } from "$/drizzle/tables"
 import { useAuthModal } from "$/stores/authModalStore"
+import { GithubIcon } from "./icons/auth/GithubIcon"
 
 export function UserAuth() {
   const { user } = usePageContext()
@@ -99,14 +100,18 @@ function AuthModalProviderList() {
       title: "Google",
       Icon: GoogleIcon,
     },
+    {
+      title: "GitHub",
+      Icon: GithubIcon,
+    },
   ]
 
   return (
-    <div className="flex gap flex-column items-center justify-center">
+    <div className="flex flex-col gap-2 gap flex-column items-center justify-center">
       {options.map((Option) => (
         <a
           href={`/login/${Option.title.toLowerCase()}`}
-          className="flex gap-2 p-3 bg-white bg-opacity-15"
+          className="flex gap-2 p-3 bg-white bg-opacity-15 w-full rounded justify-center"
         >
           <Option.Icon />
           <small>Continue with {Option.title}</small>

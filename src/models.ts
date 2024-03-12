@@ -1,4 +1,9 @@
 import { z } from "zod"
+import { AuthProvider } from "./server/services/authService"
+
+export const authProviderParamsScheme = z.object({
+  provider: z.nativeEnum(AuthProvider),
+})
 
 export const pollIdScheme = z.object({ id: z.number({ coerce: true }) })
 
