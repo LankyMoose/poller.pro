@@ -3,6 +3,7 @@ import { WebsocketClientMessage, WebsocketServerMessage } from "./types"
 
 export class LiveSocket {
   socket: WebSocket
+  pendingMessages: WebsocketClientMessage[] = []
 
   constructor(url: string) {
     this.socket = new WebSocket(url)
@@ -16,6 +17,7 @@ export class LiveSocket {
       }
     }
     this.socket.onopen = () => {
+      this.pendingMessages.forEach((msg) => this.send(msg))
       setInterval(() => {
         if (this.socket.readyState !== this.socket.OPEN) return
         this.socket.send(JSON.stringify({ type: "ping" }))
@@ -24,6 +26,10 @@ export class LiveSocket {
   }
 
   send(message: WebsocketClientMessage) {
+    if (this.socket.readyState !== this.socket.OPEN) {
+      this.pendingMessages.push(message)
+      return
+    }
     this.socket.send(JSON.stringify(message))
   }
 
