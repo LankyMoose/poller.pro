@@ -39,14 +39,19 @@ type PartialPollWithMeta = Omit<PollWithMeta, "user" | "pollOptions"> & {
 
 export const pollService = {
   async getLatestPolls(user?: UserModel): Promise<PollWithMeta[]> {
+    const latestPolls = db
+      .$with("polls")
+      .as(db.select().from(polls).orderBy(desc(polls.createdAt)).limit(20))
+
     const userVotes = alias(pollVotes, "userVote")
     try {
       const res = await db
+        .with(latestPolls)
         .select({
-          id: polls.id,
-          text: polls.text,
-          createdAt: polls.createdAt,
-          closed: polls.closed,
+          id: latestPolls.id,
+          text: latestPolls.text,
+          createdAt: latestPolls.createdAt,
+          closed: latestPolls.closed,
           user: {
             id: users.id,
             avatarUrl: users.avatarUrl,
@@ -62,27 +67,25 @@ export const pollService = {
             optionId: pollVotes.optionId,
           },
         })
-        .from(polls)
-        .leftJoin(pollVotes, eq(polls.id, pollVotes.pollId))
-        .leftJoin(users, eq(polls.userId, users.id))
-        .leftJoin(pollOptions, eq(polls.id, pollOptions.pollId))
+        .from(latestPolls)
+        .leftJoin(pollVotes, eq(latestPolls.id, pollVotes.pollId))
+        .leftJoin(users, eq(latestPolls.userId, users.id))
+        .leftJoin(pollOptions, eq(latestPolls.id, pollOptions.pollId))
         .leftJoin(
           userVotes,
           and(
-            eq(polls.id, userVotes.pollId),
+            eq(latestPolls.id, userVotes.pollId),
             eq(userVotes.userId, user?.id || -1)
           )
         )
         .groupBy(
-          polls.id,
+          latestPolls.id,
           users.id,
           pollOptions.id,
           userVotes.optionId,
           pollVotes.optionId
         )
-        .where(eq(polls.deleted, false))
-        .orderBy(desc(polls.createdAt))
-        .limit(20)
+        .where(eq(latestPolls.deleted, false))
 
       const mapped = res.reduce((acc, cur) => {
         let poll = acc.find((p) => p.id === cur.id)

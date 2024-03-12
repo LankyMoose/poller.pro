@@ -10,16 +10,19 @@ import { PollVoteScheme } from "$/models"
 import { PollWithMeta } from "$/server/services/pollService"
 import { CircleTickIcon } from "$/components/icons/CircleTickIcon"
 import { useAuthModal } from "$/stores/authModalStore"
+import { Avatar } from "$/components/Avatar"
 
 export { Page }
 
 function Page() {
+  const { user } = usePageContext()
+  const { setOpen } = useAuthModal()
   const [addPollOpen, setAddPollOpen] = useState(false)
   return (
     <div className="w-full h-full flex-grow flex flex-col items-center justify-center">
       <div className="mb-8">
         <Button
-          onclick={() => setAddPollOpen(true)}
+          onclick={() => (user ? setAddPollOpen(true) : setOpen(true))}
           className="flex gap-2 items-center"
         >
           Add poll
@@ -61,7 +64,7 @@ function PollListDisplay() {
     )
 
   return (
-    <div className="flex gap-2 items-start flex-wrap w-full max-w-[760px] mx-auto">
+    <div className="flex gap-4 items-start flex-wrap w-full max-w-[760px] mx-auto">
       {polls.length === 0 && (
         <p className="text-center">
           No polls yet. Add one with the button above ☝️
@@ -131,7 +134,7 @@ function PollCard({ id, numPolls }: { id: number; numPolls: number }) {
 
   return (
     <div
-      className={`border p-2 rounded w-full ${numPolls > 1 ? "sm:w-[calc(50%-0.25rem)]" : ""} h-fit bg-neutral-100 dark:bg-neutral-800`}
+      className={`border p-2 rounded w-full ${numPolls > 1 ? "sm:w-[calc(50%-0.5rem)]" : ""} h-fit bg-neutral-100 dark:bg-neutral-800`}
     >
       <h4 className="font-bold mb-2 flex items-center justify-between ">
         {poll.text}{" "}
@@ -161,6 +164,20 @@ function PollCard({ id, numPolls }: { id: number; numPolls: number }) {
           </li>
         ))}
       </ul>
+      <hr className="my-2" />
+      <div className="flex justify-between text-xs">
+        <span className="flex items-center gap-2">
+          <Avatar url={poll.user.avatarUrl} size={18} />
+          {poll.user.name}
+        </span>
+        <span className="text-neutral-500 flex items-center">
+          {formatUTCDate(poll.createdAt)}
+        </span>
+      </div>
     </div>
   )
+}
+
+function formatUTCDate(date: number) {
+  return new Date(date * 1000).toLocaleString()
 }
