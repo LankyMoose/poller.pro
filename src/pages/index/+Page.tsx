@@ -17,7 +17,7 @@ function Page() {
   const [addPollOpen, setAddPollOpen] = useState(false)
   return (
     <div className="w-full h-full flex-grow flex flex-col items-center justify-center">
-      <div>
+      <div className="mb-8">
         <Button
           onclick={() => setAddPollOpen(true)}
           className="flex gap-2 items-center"
@@ -31,7 +31,7 @@ function Page() {
           <NewPollForm close={() => setAddPollOpen(false)} />
         </Modal>
       </div>
-      <div className="flex-grow flex flex-col h-full w-full items-center justify-center">
+      <div className="flex-grow w-full min-h-full flex flex-col">
         <PollListDisplay />
       </div>
     </div>
@@ -53,23 +53,28 @@ function PollListDisplay() {
       })
   }, [])
 
-  if (loading) return <Spinner />
+  if (loading)
+    return (
+      <div className="flex flex-col flex-grow h-full items-center justify-center">
+        <Spinner />
+      </div>
+    )
 
   return (
-    <>
+    <div className="flex gap-2 items-start flex-wrap w-full max-w-[760px] mx-auto">
       {polls.length === 0 && (
         <p className="text-center">
           No polls yet. Add one with the button above ☝️
         </p>
       )}
       {polls.map((poll) => (
-        <PollCard id={poll.id} />
+        <PollCard id={poll.id} numPolls={polls.length} />
       ))}
-    </>
+    </div>
   )
 }
 
-function PollCard({ id }: { id: number }) {
+function PollCard({ id, numPolls }: { id: number; numPolls: number }) {
   const [isVoting, setIsVoting] = useState(false)
   const { setOpen } = useAuthModal()
   const { user } = usePageContext()
@@ -125,13 +130,15 @@ function PollCard({ id }: { id: number }) {
   }
 
   return (
-    <div className="border p-2 m-2 rounded w-full sm:w-1/2 bg-neutral-100 dark:bg-neutral-800">
+    <div
+      className={`border p-2 rounded w-full ${numPolls > 1 ? "sm:w-[calc(50%-0.25rem)]" : ""} h-fit bg-neutral-100 dark:bg-neutral-800`}
+    >
       <h4 className="font-bold mb-2 flex items-center justify-between ">
         {poll.text}{" "}
         {(user?.isAdmin || user?.id === poll.user.id) && (
           <Button
             variant="link"
-            className="text-red-500"
+            className="text-red-500 py-0"
             onclick={handleDelete}
           >
             Delete
