@@ -11,7 +11,7 @@ import { PollFormScheme } from "$/models"
 import { and, count, desc, eq, sql } from "drizzle-orm"
 import { db } from "./db"
 import { alias } from "drizzle-orm/sqlite-core"
-import { broadcastUpdate } from "../socket"
+import { broadcastUpdate, createPollSubscriptionSet } from "../socket"
 
 export type PollWithMeta = {
   id: number
@@ -126,6 +126,8 @@ export const pollService = {
         }
         return acc
       }, [] as PartialPollWithMeta[])
+
+      mapped.forEach(({ id }) => createPollSubscriptionSet(id.toString()))
 
       return mapped.map((poll) => {
         const { pollVotes, ...rest } = poll
