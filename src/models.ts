@@ -1,6 +1,6 @@
 import { z } from "zod"
 
-export const pollIdScheme = z.object({ id: z.number() })
+export const pollIdScheme = z.object({ id: z.number({ coerce: true }) })
 
 export const pollFormScheme = z.object({
   text: z.string().min(4).max(100),

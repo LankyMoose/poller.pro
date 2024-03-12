@@ -2,6 +2,8 @@ import { FastifyInstance, FastifyRequest } from "fastify"
 import { pollService } from "../services/pollService"
 import { UserModel } from "$/drizzle/tables"
 import { subscribeToPolls } from "../socket"
+import { pollFormScheme, pollIdScheme, pollVoteScheme } from "$/models"
+import { ZodTypeProvider } from "fastify-type-provider-zod"
 
 export function configurePollRoutes(app: FastifyInstance) {
   app.get("/api/polls", async function (request) {
@@ -13,20 +15,23 @@ export function configurePollRoutes(app: FastifyInstance) {
     )
     return res
   })
-  app.zod.post(
-    "/api/polls",
-    { operationId: "addPoll", body: `pollFormScheme` },
-    async function (req) {
-      const user = getUser(req)
-      if (!user) throw { statusCode: 401, message: "Unauthorized" }
-      return pollService.addPoll(req.body, user)
-    }
-  )
-  app.zod.delete(
+  app
+    .withTypeProvider<ZodTypeProvider>()
+    .post(
+      "/api/polls",
+      { schema: { body: pollFormScheme } },
+      async function (req) {
+        const user = getUser(req)
+        if (!user) throw { statusCode: 401, message: "Unauthorized" }
+        return pollService.addPoll(req.body, user)
+      }
+    )
+  app.withTypeProvider<ZodTypeProvider>().delete(
     "/api/polls/:id",
     {
-      operationId: "deletePoll",
-      params: "pollIdScheme",
+      schema: {
+        params: pollIdScheme,
+      },
     },
     async function (req, res) {
       const user = getUser(req)
@@ -35,20 +40,20 @@ export function configurePollRoutes(app: FastifyInstance) {
       return res.code(200).send(undefined)
     }
   )
-  app.zod.post(
-    "/api/polls/:id/vote",
-    {
-      operationId: "vote",
-      params: "pollIdScheme",
-      body: "pollVoteScheme",
+  app.withTypeProvider<ZodTypeProvider>().route({
+    method: "POST",
+    url: "/api/polls/:id/vote",
+    schema: {
+      params: pollIdScheme,
+      body: pollVoteScheme,
     },
-    async function (req, res) {
+    handler: async (req, res) => {
       const user = getUser(req)
       if (!user) throw { statusCode: 401, message: "Unauthorized" }
       await pollService.vote(req.params.id, user.id, req.body.pollOptionId)
       return res.code(200).send(undefined)
-    }
-  )
+    },
+  })
 }
 
 function getUser(request: FastifyRequest): UserModel | undefined {

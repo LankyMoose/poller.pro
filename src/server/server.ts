@@ -1,13 +1,17 @@
 // https://github.com/royalswe/vike-fastify-boilerplate/blob/main/server/index.ts
 import { renderPage } from "vike/server"
+
 import fastify from "fastify"
-import cookie from "@fastify/cookie"
 import compress from "@fastify/compress"
+import cookie from "@fastify/cookie"
+import { OAuth2Namespace } from "@fastify/oauth2"
 import fStatic from "@fastify/static"
 import fWebsocket from "@fastify/websocket"
-import { OAuth2Namespace } from "@fastify/oauth2"
-import { FastifyZod, buildJsonSchemas, register } from "fastify-zod"
-import * as models from "$/models"
+
+import {
+  serializerCompiler,
+  validatorCompiler,
+} from "fastify-type-provider-zod"
 
 import { env } from "./env"
 import { configureAuthRoutes } from "./api/auth"
@@ -21,7 +25,7 @@ declare module "fastify" {
       (request: FastifyRequest, reply: FastifyReply): Promise<void>
     }
     googleOAuth2: OAuth2Namespace
-    readonly zod: FastifyZod<typeof models>
+    // readonly zod: FastifyZod<typeof models>
   }
   interface Session {
     authCallback: string
@@ -32,6 +36,8 @@ declare module "fastify" {
 const root = process.cwd()
 async function startServer() {
   const app = fastify()
+    .setValidatorCompiler(validatorCompiler)
+    .setSerializerCompiler(serializerCompiler)
     .register(cookie)
     .register(fWebsocket, { options: { maxPayload: 0 } })
     .register(compress, { global: true })
@@ -44,18 +50,17 @@ async function startServer() {
         .status(error.statusCode ?? 500)
         .send({ message: error.message ?? "Internal Server Error" })
     })
-
-  app.addHook("onRequest", async (req, res) => {
-    if (!req.cookies["user_anon_id"]) {
-      res.setCookie("user_anon_id", crypto.randomUUID(), {
-        domain: env.host || "localhost",
-        path: "/",
-        sameSite: "lax",
-        httpOnly: true,
-        secure: env.isProduction,
-      })
-    }
-  })
+    .addHook("onRequest", async (req, res) => {
+      if (!req.cookies["user_anon_id"]) {
+        res.setCookie("user_anon_id", crypto.randomUUID(), {
+          domain: env.host || "localhost",
+          path: "/",
+          sameSite: "lax",
+          httpOnly: true,
+          secure: env.isProduction,
+        })
+      }
+    })
 
   app.register(async function () {
     app.route({
@@ -66,9 +71,9 @@ async function startServer() {
     })
   })
 
-  await register(app, {
-    jsonSchemas: buildJsonSchemas(models),
-  })
+  // await register(app, {
+  //   jsonSchemas: buildJsonSchemas(models),
+  // })
 
   if (env.isProduction) {
     app.register(fStatic, {
