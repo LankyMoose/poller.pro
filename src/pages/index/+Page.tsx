@@ -145,18 +145,21 @@ function PollCard({ id, numPolls }: { id: number; numPolls: number }) {
       className={`border p-2 rounded w-full ${numPolls > 1 ? "sm:w-[calc(50%-0.5rem)]" : ""} h-fit bg-neutral-800`}
     >
       <h4 className="font-bold mb-2 flex items-center justify-between ">
-        <span>
-          {poll.text} <sup>({totalVotes} votes)</sup>
-        </span>
-        {(user?.isAdmin || user?.id === poll.user.id) && (
-          <Button
-            variant="link"
-            className="text-red-500 py-0"
-            onclick={handleDelete}
-          >
-            Delete
-          </Button>
-        )}
+        <span>{poll.text}</span>
+        <div className="flex flex-col justify-end">
+          <small className="text-nowrap text-xs text-neutral-300">
+            ({totalVotes} votes)
+          </small>
+          {(user?.isAdmin || user?.id === poll.user.id) && (
+            <Button
+              variant="link"
+              className="text-red-500 py-0 pr-0"
+              onclick={handleDelete}
+            >
+              Delete
+            </Button>
+          )}
+        </div>
       </h4>
       <hr className="my-2" />
       <ul className="flex gap-2 flex-col mb-2">
