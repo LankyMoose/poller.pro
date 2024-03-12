@@ -7,7 +7,6 @@ export function trapFocus(element: Element, e: KeyboardEvent) {
     const focusableModalElements = element.querySelectorAll(
       'button:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
     )
-    console.log(focusableModalElements)
     const firstElement = focusableModalElements[0]
     const lastElement =
       focusableModalElements[focusableModalElements.length - 1]
