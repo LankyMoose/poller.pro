@@ -51,7 +51,7 @@ export class LiveSocket {
           }
         })
 
-        usePollStore.methods.updatePoll({ ...poll, pollOptions })
+        usePollStore.methods.updatePoll({ id: poll.id, pollOptions })
         break
 
       case "-poll":

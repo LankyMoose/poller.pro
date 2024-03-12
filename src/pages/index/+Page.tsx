@@ -125,9 +125,9 @@ function PollCard({ id, numPolls }: { id: number; numPolls: number }) {
         id: _poll.id,
         userVote: pollOptionId,
       })
-      setIsVoting(false)
     } catch (error) {
       console.error("handleVote err", error)
+    } finally {
       setIsVoting(false)
     }
   }
