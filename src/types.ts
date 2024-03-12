@@ -17,3 +17,21 @@ export enum AuthProvider {
   Google = "google",
   Github = "github",
 }
+
+export type PollWithMeta = {
+  id: number
+  text: string
+  createdAt: number
+  closed: boolean | null
+  user: {
+    id: number
+    avatarUrl: string | null
+    name: string
+  }
+  pollOptions: {
+    id: number
+    text: string
+    count: number
+  }[]
+  userVote: number | null
+}

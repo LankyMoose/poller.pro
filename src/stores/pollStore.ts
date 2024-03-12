@@ -1,4 +1,4 @@
-import type { PollWithMeta } from "$/server/services/pollService"
+import type { PollWithMeta } from "$/types"
 import { createStore } from "kaioken"
 
 export const usePollStore = createStore(

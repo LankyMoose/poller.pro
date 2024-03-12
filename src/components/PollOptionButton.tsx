@@ -1,4 +1,4 @@
-import type { PollWithMeta } from "$/server/services/pollService"
+import type { PollWithMeta } from "$/types"
 import { CircleTickIcon } from "./icons/CircleTickIcon"
 
 export function PollOptionButton({

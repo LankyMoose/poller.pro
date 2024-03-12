@@ -12,24 +12,7 @@ import { and, count, desc, eq, sql } from "drizzle-orm"
 import { db } from "./db"
 import { alias } from "drizzle-orm/sqlite-core"
 import { broadcastUpdate, createPollSubscriptionSet } from "../socket"
-
-export type PollWithMeta = {
-  id: number
-  text: string
-  createdAt: number
-  closed: boolean | null
-  user: {
-    id: number
-    avatarUrl: string | null
-    name: string
-  }
-  pollOptions: {
-    id: number
-    text: string
-    count: number
-  }[]
-  userVote: number | null
-}
+import { PollWithMeta } from "$/types"
 
 type PartialPollWithMeta = Omit<PollWithMeta, "user" | "pollOptions"> & {
   user?: PollWithMeta["user"]

@@ -5,7 +5,7 @@ import { Input } from "../atoms/Input"
 import { PlusIcon } from "../icons/PlusIcon"
 import { PollFormScheme, pollFormReqs, pollFormScheme } from "$/models"
 import { usePollStore } from "$/stores/pollStore"
-import { PollWithMeta } from "$/server/services/pollService"
+import { PollWithMeta } from "$/types"
 import { CircleTickIcon } from "../icons/CircleTickIcon"
 import { CircleAlertIcon } from "../icons/CircleAlertIcon"
 

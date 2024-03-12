@@ -1,7 +1,7 @@
 import { useState, useEffect } from "kaioken"
 import { usePageContext } from "$/context/pageContext"
 import { PollVoteScheme } from "$/models"
-import type { PollWithMeta } from "$/server/services/pollService"
+import type { PollWithMeta } from "$/types"
 import { useAuthModal } from "$/stores/authModalStore"
 import { usePollStore } from "$/stores/pollStore"
 import { Avatar } from "./Avatar"
