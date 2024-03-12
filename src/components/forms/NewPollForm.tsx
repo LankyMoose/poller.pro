@@ -1,4 +1,4 @@
-import { useState, useModel } from "kaioken"
+import { useState, useModel, useEffect, useRef } from "kaioken"
 import { Button } from "../atoms/Button"
 import { MinusIcon } from "../icons/MinusIcon"
 import { Input } from "../atoms/Input"
@@ -11,11 +11,29 @@ import { CircleAlertIcon } from "../icons/CircleAlertIcon"
 
 export function NewPollForm({ close }: { close: () => void }) {
   const { addPoll } = usePollStore.methods
+  const addedOption = useRef<boolean>(false)
+  const optionsContainerRef = useRef<HTMLDivElement>(null)
   const [submitting, setSubmitting] = useState(false)
   const [titleInputRef, titleInputValue] = useModel<HTMLInputElement, string>(
     ""
   )
   const [options, setOptions] = useState<string[]>(["", ""])
+
+  useEffect(() => {
+    if (titleInputRef.current) titleInputRef.current.focus()
+  }, [titleInputRef.current])
+
+  useEffect(() => {
+    if (addedOption.current && optionsContainerRef.current) {
+      const input = optionsContainerRef.current.querySelector(
+        ".option-item:last-child input"
+      )
+      if (input && input instanceof HTMLInputElement) {
+        input.focus()
+      }
+      addedOption.current = false
+    }
+  }, [options.length])
 
   const isValid = () =>
     pollFormScheme.safeParse({ text: titleInputValue, options }).success
@@ -48,13 +66,14 @@ export function NewPollForm({ close }: { close: () => void }) {
 
   function addOption() {
     setOptions([...options, ""])
+    addedOption.current = true
   }
 
   const titleValid = pollFormReqs.text.validate(titleInputValue)
   const optionsLengthValid = pollFormReqs.options.validate(options)
 
   return (
-    <div>
+    <div className="min-w-[300px]">
       <div className="mb-2">
         <Input
           minLength={pollFormReqs.text.min}
@@ -62,10 +81,11 @@ export function NewPollForm({ close }: { close: () => void }) {
           ref={titleInputRef}
           value={titleInputValue}
           type="text"
+          name="poll display text"
           placeholder="Text"
         />
         {!titleValid && (
-          <small className="text-red-500 text-xs">
+          <small className="text-red-500 text-xs block mt-1">
             {titleInputValue.length > pollFormReqs.text.max
               ? `Enter at most ${pollFormReqs.text.max} characters`
               : `Enter at least ${pollFormReqs.text.min} characters`}
@@ -78,14 +98,15 @@ export function NewPollForm({ close }: { close: () => void }) {
         <hr className="my-2" />
         <div>
           <div className="mb-2">
-            <div className="flex flex-col gap-2 mt-2">
+            <div className="flex flex-col gap-2 mt-2" ref={optionsContainerRef}>
               {options.map((o, i) => (
-                <div className="border bg-neutral-100 dark:bg-neutral-800 relative rounded flex justify-between items-center">
+                <div className="option-item border bg-neutral-100 dark:bg-neutral-800 relative rounded flex justify-between items-center">
                   <Input
                     minLength={pollFormReqs.optionText.min}
                     maxLength={pollFormReqs.optionText.max}
                     className="bg-black bg-opacity-15 border-0 pr-8"
                     value={o}
+                    name={`option-${i}`}
                     oninput={(e) => {
                       setOptions(
                         options.map((x, j) => (i === j ? e.target.value : x))
@@ -128,7 +149,7 @@ export function NewPollForm({ close }: { close: () => void }) {
             <Button
               disabled={!optionsLengthValid}
               onclick={addOption}
-              className="text-nowrap text-xs flex gap-2 w-full items-center justify-center"
+              className="text-nowrap text-xs flex gap-2 w-full items-center justify-center py-3"
             >
               <PlusIcon width={"1em"} height={".8em"} />
               <span style="line-height: 0">Add Option</span>
