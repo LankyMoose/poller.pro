@@ -89,7 +89,7 @@ function PollCard({ id, numPolls }: { id: number; numPolls: number }) {
   } = usePollStore((state) => state.polls.find((p) => p.id === id))
 
   useEffect(() => {
-    if (!poll) return
+    if (!poll || !user) return
     window.liveSocket.send({ type: "+sub", id: poll.id })
     return () => window.liveSocket.send({ type: "-sub", id: poll.id })
   }, [])

@@ -11,14 +11,13 @@ declare global {
   }
 }
 
-if (typeof window !== "undefined") {
-  window.liveSocket = createLiveSocket()
-}
-
 export const onRenderClient: OnRenderClientAsync = async (pageContext) => {
   const container = document.getElementById("page-root")!
 
   if (pageContext.isHydration) {
+    if (pageContext.user) {
+      window.liveSocket = createLiveSocket()
+    }
     document.title = getTitle(pageContext)
     hydrate(App, container, { pageContext })
   }
