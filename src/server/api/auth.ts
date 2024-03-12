@@ -6,7 +6,7 @@ import { AuthProvider, authService } from "../services/authService"
 import { env } from "../env"
 
 export const cookieSettings = {
-  domain: env.host || "localhost",
+  domain: env.domain || "localhost",
   path: "/",
   sameSite: "lax",
   secure: env.isProduction,

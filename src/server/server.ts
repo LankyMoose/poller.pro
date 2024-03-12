@@ -128,9 +128,12 @@ async function startServer() {
 }
 async function main() {
   const fastify = await startServer()
-  const { url, port } = env
+  const {
+    server: { host, port },
+    url,
+  } = env
   try {
-    fastify.listen({ port }, function (err) {
+    fastify.listen({ host, port }, function (err) {
       if (err) {
         fastify.log.error(err)
         console.error(err)

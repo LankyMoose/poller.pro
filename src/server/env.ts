@@ -21,9 +21,12 @@ function validate<T>(obj: T, path: string = "", errors: string[] = []) {
 }
 
 export const env = validate({
-  port: Number(process.env.PORT || "5173"),
+  server: {
+    host: process.env.HOST || "localhost",
+    port: Number(process.env.PORT || "5173"),
+  },
   url: process.env.URL || "http://localhost:5173",
-  host: process.env.HOST || "localhost",
+  domain: process.env.DOMAIN || "localhost",
   isProduction: process.env.NODE_ENV === "production",
   db: {
     url: process.env.DATABASE_URL,
