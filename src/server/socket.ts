@@ -17,6 +17,7 @@ export const broadcastUpdate = (
       if (conn.socket.readyState !== 1) {
         return console.error("ws conn not open", conn.socket.readyState)
       }
+      console.log("sending", message)
       conn.socket.send(JSON.stringify(message))
     })
   } catch (error) {
@@ -44,6 +45,7 @@ export const socketHandler = (conn: SocketStream) => {
         conn.socket.send(JSON.stringify({ type: "ping" }))
         break
       case "+sub":
+        console.log("sub", data)
         if (!pollSubscriptions[data.id]) {
           pollSubscriptions[data.id] = []
         }
