@@ -12,3 +12,8 @@ export type WebsocketClientMessage =
   | { type: "+sub"; id: number }
   | { type: "-sub"; id: number }
   | { type: "ping" }
+
+export enum AuthProvider {
+  Google = "google",
+  Github = "github",
+}

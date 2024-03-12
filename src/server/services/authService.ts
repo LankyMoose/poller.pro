@@ -11,13 +11,9 @@ import { UserAuthInsertModel, UserAuthModel, userAuths } from "$/drizzle/schema"
 import { eq, and } from "drizzle-orm"
 import { db } from "./db"
 import { FastifyInstance, FastifyRequest } from "fastify"
+import { AuthProvider } from "$/types"
 
 export type AuthCallbackState = Record<string, unknown>
-
-export enum AuthProvider {
-  Google = "google",
-  Github = "github",
-}
 
 export type ProviderInfo<T extends AuthProvider> = T extends AuthProvider.Google
   ? {

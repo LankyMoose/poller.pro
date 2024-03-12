@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { AuthProvider } from "./server/services/authService"
+import { AuthProvider } from "./types"
 
 export const authProviderParamsScheme = z.object({
   provider: z.nativeEnum(AuthProvider),
