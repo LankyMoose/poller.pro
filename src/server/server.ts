@@ -127,14 +127,19 @@ async function startServer() {
 }
 async function main() {
   const fastify = await startServer()
-  const { host, port } = env
-  fastify.listen({ host, port }, function (err) {
-    if (err) {
-      fastify.log.error(err)
-      process.exit(1)
-    }
-    console.log(`Server listening at http://${host}:${port}`)
-  })
+  const { url, port } = env
+  try {
+    fastify.listen({ port }, function (err) {
+      if (err) {
+        fastify.log.error(err)
+        console.error(err)
+        process.exit(1)
+      }
+      console.log(`Server listening at ${url}`)
+    })
+  } catch (error) {
+    console.error(error)
+  }
 }
 
 main()
