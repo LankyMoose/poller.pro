@@ -84,7 +84,10 @@ export const authService = {
           return (
             await app.googleOAuth2.getAccessTokenFromAuthorizationCodeFlow(req)
           ).token.access_token
-
+        case AuthProvider.Github:
+          return (
+            await app.githubOAuth2.getAccessTokenFromAuthorizationCodeFlow(req)
+          ).token.access_token
         default:
           throw "Unsupported Auth Provider"
       }
