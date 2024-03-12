@@ -89,7 +89,7 @@ export const authService = {
             await app.githubOAuth2.getAccessTokenFromAuthorizationCodeFlow(req)
           ).token.access_token
         default:
-          throw "Unsupported Auth Provider"
+          throw `Unsupported Auth Provider "${provider}"`
       }
     } catch (error) {
       console.error(error)
@@ -99,15 +99,9 @@ export const authService = {
 
   async loadProviderData<T extends AuthProvider>(
     provider: T,
-    reqOrToken: FastifyRequest | string
+    token: string
   ): Promise<ProviderInfo<T> | undefined> {
     try {
-      const tkn =
-        typeof reqOrToken === "string"
-          ? reqOrToken
-          : reqOrToken.cookies["access_token"]
-      if (!tkn) return
-
       let url
       switch (provider) {
         case AuthProvider.Google:
@@ -116,13 +110,13 @@ export const authService = {
         case AuthProvider.Github:
           url = "https://api.github.com/user"
         default:
-          throw "Unsupported Auth Provider"
+          throw `Unsupported Auth Provider "${provider}"`
       }
 
       const res = await fetch(url, {
         method: "GET",
         headers: {
-          Authorization: "Bearer " + tkn,
+          Authorization: "Bearer " + token,
         },
       })
       if (!res.ok) return
@@ -150,7 +144,7 @@ export const authService = {
         return { name: login, picture: avatar_url, providerId: id, email }
       }
       default:
-        throw "Unsupported Auth Provider"
+        throw `Unsupported Auth Provider "${provider}"`
     }
   },
 }
