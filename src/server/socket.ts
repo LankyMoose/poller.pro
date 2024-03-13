@@ -51,9 +51,6 @@ export const socketHandler = (conn: SocketStream) => {
   conn.on("data", (chunk) => {
     const data = JSON.parse(chunk) as WebsocketClientMessage
     switch (data.type) {
-      case "ping":
-        conn.socket.send(JSON.stringify({ type: "ping" }))
-        break
       case "+sub":
         const s = pollSubscriptions[data.id]
         if (!s) {

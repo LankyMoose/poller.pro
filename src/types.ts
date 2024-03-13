@@ -6,12 +6,10 @@ export type WebsocketServerMessage =
       pollId: number
       votes: { id: number; count: number }[]
     }
-  | { type: "ping" }
 
 export type WebsocketClientMessage =
   | { type: "+sub"; id: number }
   | { type: "-sub"; id: number }
-  | { type: "ping" }
 
 export enum AuthProvider {
   Google = "google",

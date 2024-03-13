@@ -18,10 +18,6 @@ export class LiveSocket {
     }
     this.socket.onopen = () => {
       this.pendingMessages.forEach((msg) => this.send(msg))
-      setInterval(() => {
-        if (this.socket.readyState !== this.socket.OPEN) return
-        this.socket.send(JSON.stringify({ type: "ping" }))
-      }, 3000)
     }
   }
 
@@ -58,8 +54,6 @@ export class LiveSocket {
         usePollStore.methods.deletePoll(message.id)
         break
 
-      case "ping":
-        return
       default:
         return
     }
