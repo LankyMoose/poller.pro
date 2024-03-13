@@ -1,6 +1,12 @@
 import { UTC } from "$/utils"
 import { relations } from "drizzle-orm"
-import { text, integer, sqliteTable, index } from "drizzle-orm/sqlite-core"
+import {
+  text,
+  integer,
+  sqliteTable,
+  index,
+  uniqueIndex,
+} from "drizzle-orm/sqlite-core"
 import { polls } from "./polls"
 import { pollVotes } from "./pollVotes"
 
@@ -44,6 +50,9 @@ const userAuths = sqliteTable(
     emailIdx: index("user_auth_email_idx").on(table.email),
     userIdIdx: index("user_auth_user_id_idx").on(table.userId),
     providerIdIdx: index("user_auth_provider_id_idx").on(table.providerId),
+    uniqueProviderToIdIdx: uniqueIndex(
+      "user_auth_unique_provider_to_id_idx"
+    ).on(table.providerId, table.provider),
   })
 )
 

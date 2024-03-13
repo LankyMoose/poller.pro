@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX `user_auth_unique_provider_to_id_idx` ON `user_auth` (`provider_id`,`provider`);

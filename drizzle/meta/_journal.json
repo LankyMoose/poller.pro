@@ -8,6 +8,13 @@
       "when": 1710169890041,
       "tag": "0000_bright_amazoness",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1710300011120,
+      "tag": "0001_lush_clea",
+      "breakpoints": true
     }
   ]
 }
