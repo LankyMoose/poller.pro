@@ -6,18 +6,12 @@ type PollID = string
 const connections: WeakSet<SocketStream> = new WeakSet()
 const pollSubscriptions: Record<PollID, SocketStream[]> = {}
 
-// every 5 min, check for pollSubscriptions that are empty and remove them
-setInterval(clearEmptyPollSubscriptions, 1000 * 60 * 5)
-function clearEmptyPollSubscriptions() {
-  Object.entries(pollSubscriptions).forEach(([id, arr]) => {
-    if (arr.length === 0) {
-      delete pollSubscriptions[id]
-    }
-  })
-}
-
 export const createPollSubscriptionSet = (pollId: PollID) =>
   (pollSubscriptions[pollId] = [])
+
+export const deletePollSubscriptionSet = (pollId: PollID) => {
+  delete pollSubscriptions[pollId]
+}
 
 export const broadcastUpdate = (
   pollId: PollID,
@@ -25,7 +19,7 @@ export const broadcastUpdate = (
 ) => {
   const clients = pollSubscriptions[pollId] ?? []
   try {
-    clients?.forEach((conn) => {
+    clients.forEach((conn) => {
       if (conn.socket.readyState !== 1) {
         return console.error("ws conn not open", conn.socket.readyState)
       }
@@ -52,12 +46,7 @@ export const socketHandler = (conn: SocketStream) => {
     const data = JSON.parse(chunk) as WebsocketClientMessage
     switch (data.type) {
       case "+sub":
-        const s = pollSubscriptions[data.id]
-        if (!s) {
-          pollSubscriptions[data.id] = [conn]
-        } else {
-          s.push(conn)
-        }
+        pollSubscriptions[data.id]?.push(conn)
         break
       case "-sub":
         if (!pollSubscriptions[data.id]) return

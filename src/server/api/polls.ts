@@ -30,8 +30,12 @@ export function configurePollRoutes(app: FastifyInstance) {
     async function (req, res) {
       const user = getUser(req)
       if (!user) throw { statusCode: 401, message: "Unauthorized" }
-      await pollService.deletePoll(req.params.id, user.id, !!user.isAdmin)
-      return res.code(200).send(undefined)
+      const didDelete = await pollService.deletePoll(
+        req.params.id,
+        user.id,
+        !!user.isAdmin
+      )
+      return res.code(didDelete ? 200 : 400).send(undefined)
     }
   )
   app.withTypeProvider<ZodTypeProvider>().route({

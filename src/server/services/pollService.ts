@@ -11,7 +11,11 @@ import { PollFormScheme } from "$/models"
 import { and, count, desc, eq, sql } from "drizzle-orm"
 import { db } from "./db"
 import { alias } from "drizzle-orm/sqlite-core"
-import { broadcastUpdate, createPollSubscriptionSet } from "../socket"
+import {
+  broadcastUpdate,
+  createPollSubscriptionSet,
+  deletePollSubscriptionSet,
+} from "../socket"
 import { PollWithMeta } from "$/types"
 
 type PartialPollWithMeta = Omit<PollWithMeta, "user" | "pollOptions"> & {
@@ -159,13 +163,20 @@ export const pollService = {
     })
   },
   async deletePoll(id: number, userId: number, isAdmin: boolean) {
-    return db
+    const res = await db
       .delete(polls)
       .where(
         isAdmin
           ? eq(polls.id, id)
           : and(eq(polls.id, id), eq(polls.userId, userId))
       )
+      .returning()
+      .get()
+    if (res) {
+      deletePollSubscriptionSet(id.toString())
+      return true
+    }
+    return false
   },
   async vote(pollId: number, userId: number, optionId: number) {
     const res = await db
