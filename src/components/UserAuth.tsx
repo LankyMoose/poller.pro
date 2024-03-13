@@ -48,7 +48,7 @@ function UserDisplay({ user }: { user: UserModel }) {
         className="flex gap-2 items-center"
         title={user.name}
       >
-        <Avatar url={user.avatarUrl} size={24} />
+        <Avatar url={user.avatarUrl} size={24} alt={user.name} />
       </button>
       <Transition
         in={open}

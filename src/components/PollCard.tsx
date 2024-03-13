@@ -113,13 +113,13 @@ export function PollCard({ id, numPolls }: { id: number; numPolls: number }) {
       </ul>
       <hr className="my-2" />
       <div className="flex justify-between text-xs">
-        <span className="flex items-center gap-2">
-          <Avatar url={poll.user.avatarUrl} size={18} />
-          {poll.user.name}
-        </span>
-        <span className="text-neutral-500 flex items-center">
+        <div className="flex items-center gap-2">
+          <Avatar url={poll.user.avatarUrl} size={18} alt={poll.user.name} />
+          <span>{poll.user.name}</span>
+        </div>
+        <small className="text-neutral-300 flex items-center">
           {UTC.toLocaleString(poll.createdAt)}
-        </span>
+        </small>
       </div>
     </div>
   )
