@@ -4,26 +4,26 @@ import { WebsocketClientMessage, WebsocketServerMessage } from "$/types"
 type PollID = string
 
 const connections: WeakSet<SocketStream> = new WeakSet()
-const pollSubscriptions: Record<PollID, Set<SocketStream>> = {}
+const pollSubscriptions: Record<PollID, SocketStream[]> = {}
 
 // every 5 min, check for pollSubscriptions that are empty and remove them
 setInterval(clearEmptyPollSubscriptions, 1000 * 60 * 5)
 function clearEmptyPollSubscriptions() {
-  Object.entries(pollSubscriptions).forEach(([id, set]) => {
-    if (set.size === 0) {
+  Object.entries(pollSubscriptions).forEach(([id, arr]) => {
+    if (arr.length === 0) {
       delete pollSubscriptions[id]
     }
   })
 }
 
 export const createPollSubscriptionSet = (pollId: PollID) =>
-  (pollSubscriptions[pollId] = new Set())
+  (pollSubscriptions[pollId] = [])
 
 export const broadcastUpdate = (
   pollId: PollID,
   message: WebsocketServerMessage
 ) => {
-  const clients = pollSubscriptions[pollId]
+  const clients = pollSubscriptions[pollId] ?? []
   try {
     clients?.forEach((conn) => {
       if (conn.socket.readyState !== 1) {
@@ -38,7 +38,11 @@ export const broadcastUpdate = (
 
 function handleDisconnect(conn: SocketStream) {
   connections.delete(conn)
-  Object.values(pollSubscriptions).forEach((set) => set.delete(conn))
+  Object.keys(pollSubscriptions).forEach((pollId) => {
+    pollSubscriptions[pollId] = pollSubscriptions[pollId].filter(
+      (c) => c !== conn
+    )
+  })
 }
 
 export const socketHandler = (conn: SocketStream) => {
@@ -51,10 +55,18 @@ export const socketHandler = (conn: SocketStream) => {
         conn.socket.send(JSON.stringify({ type: "ping" }))
         break
       case "+sub":
-        pollSubscriptions[data.id]?.add(conn)
+        const s = pollSubscriptions[data.id]
+        if (!s) {
+          pollSubscriptions[data.id] = [conn]
+        } else {
+          s.push(conn)
+        }
         break
       case "-sub":
-        pollSubscriptions[data.id]?.delete(conn)
+        if (!pollSubscriptions[data.id]) return
+        pollSubscriptions[data.id] = pollSubscriptions[data.id].filter(
+          (c) => c !== conn
+        )
         break
       default:
     }
