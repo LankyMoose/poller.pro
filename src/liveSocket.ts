@@ -17,7 +17,8 @@ export class LiveSocket {
       }
     }
     this.socket.onopen = () => {
-      this.pendingMessages.forEach((msg) => this.send(msg))
+      while (this.pendingMessages.length)
+        this.send(this.pendingMessages.shift()!)
     }
   }
 
