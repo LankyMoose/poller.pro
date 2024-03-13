@@ -126,12 +126,12 @@ export const pollService = {
     }
   },
   async addPoll(poll: PollFormScheme, user: UserModel): Promise<PollWithMeta> {
-    const { options, ...rest } = poll
+    const { options, text } = poll
 
     return await db.transaction(async (tx) => {
       const poll: PollModel = await tx
         .insert(polls)
-        .values({ ...rest, userId: user.id })
+        .values({ text: text.trim(), userId: user.id })
         .returning()
         .get()
 
@@ -139,7 +139,7 @@ export const pollService = {
         .insert(pollOptions)
         .values(
           options.map((o) => ({
-            text: o,
+            text: o.trim(),
             pollId: poll.id,
           }))
         )
@@ -168,14 +168,16 @@ export const pollService = {
       )
   },
   async vote(pollId: number, userId: number, optionId: number) {
-    await db
+    const res = await db
       .insert(pollVotes)
       .values({ pollId, userId, optionId })
       .onConflictDoUpdate({
         target: [pollVotes.pollId, pollVotes.userId],
         set: { optionId },
       })
-      .run()
+      .returning()
+      .get()
+    if (!res) return false
 
     const newVoteCounts = await db
       .select({ id: pollVotes.optionId, count: count(pollVotes.id) })
@@ -183,12 +185,16 @@ export const pollService = {
       .where(and(eq(pollVotes.pollId, pollId)))
       .groupBy(pollVotes.optionId)
       .all()
-    if (!newVoteCounts) return console.error("vote err")
+    if (!newVoteCounts) {
+      console.error("vote err")
+      return false
+    }
 
     broadcastUpdate(pollId.toString(), {
       type: "~voteCounts",
       pollId,
       votes: newVoteCounts,
     })
+    return true
   },
 }

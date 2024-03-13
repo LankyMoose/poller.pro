@@ -44,8 +44,12 @@ export function configurePollRoutes(app: FastifyInstance) {
     handler: async (req, res) => {
       const user = getUser(req)
       if (!user) throw { statusCode: 401, message: "Unauthorized" }
-      await pollService.vote(req.params.id, user.id, req.body.pollOptionId)
-      return res.code(200).send(undefined)
+      const didVote = await pollService.vote(
+        req.params.id,
+        user.id,
+        req.body.pollOptionId
+      )
+      return res.code(didVote ? 200 : 400).send(undefined)
     },
   })
 }

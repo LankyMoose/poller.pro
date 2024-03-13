@@ -77,7 +77,9 @@ export function PollCard({ id, numPolls }: { id: number; numPolls: number }) {
       className={`border p-2 rounded w-full ${numPolls > 1 ? "sm:w-[calc(50%-0.5rem)]" : ""} h-fit bg-neutral-800`}
     >
       <h4 className="font-bold mb-2 flex items-center justify-between ">
-        <span>{poll.text}</span>
+        <span className="max-w-full overflow-hidden text-ellipsis">
+          {poll.text}
+        </span>
         <div className="flex flex-col justify-end">
           <small className="text-nowrap text-xs text-neutral-300">
             ({totalVotes} votes)

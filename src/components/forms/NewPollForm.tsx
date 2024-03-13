@@ -69,7 +69,7 @@ export function NewPollForm({ close }: { close: () => void }) {
     addedOption.current = true
   }
 
-  const titleValid = pollFormReqs.text.validate(titleInputValue)
+  const titleValid = pollFormReqs.text.validate(titleInputValue.trim())
   const optionsLengthValid = pollFormReqs.options.validate(options)
 
   return (
@@ -86,7 +86,7 @@ export function NewPollForm({ close }: { close: () => void }) {
         />
         {!titleValid && (
           <small className="text-red-500 text-xs block mt-1">
-            {titleInputValue.length > pollFormReqs.text.max
+            {titleInputValue.trim().length > pollFormReqs.text.max
               ? `Enter at most ${pollFormReqs.text.max} characters`
               : `Enter at least ${pollFormReqs.text.min} characters`}
           </small>
@@ -127,7 +127,7 @@ export function NewPollForm({ close }: { close: () => void }) {
                       </button>
                     )}
                     <div className="pr-2">
-                      {pollFormReqs.optionText.validate(options, o) ? (
+                      {pollFormReqs.optionText.validate(options, o.trim()) ? (
                         <span className="text-green-500">
                           <CircleTickIcon width={"1em"} height={"1em"} />
                         </span>
