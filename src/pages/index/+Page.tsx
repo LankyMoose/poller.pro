@@ -61,14 +61,14 @@ function PollListDisplay() {
     )
 
   return (
-    <div className="flex gap-4 items-start flex-wrap w-full max-w-[760px] mx-auto">
+    <div className="flex gap-4 items-start flex-wrap w-full max-w-[540px] mx-auto">
       {polls.length === 0 && (
         <p className="text-center">
           No polls yet. Add one with the button above ☝️
         </p>
       )}
       {polls.map((poll) => (
-        <PollCard id={poll.id} numPolls={polls.length} />
+        <PollCard id={poll.id} />
       ))}
     </div>
   )

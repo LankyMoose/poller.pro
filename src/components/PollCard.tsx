@@ -10,7 +10,7 @@ import { Button } from "./atoms/Button"
 import { UTC } from "$/utils"
 import "./PollCard.css"
 
-export function PollCard({ id, numPolls }: { id: number; numPolls: number }) {
+export function PollCard({ id }: { id: number }) {
   const [isVoting, setIsVoting] = useState(false)
   const { setOpen } = useAuthModal()
   const { user } = usePageContext()
@@ -79,10 +79,8 @@ export function PollCard({ id, numPolls }: { id: number; numPolls: number }) {
   }))
 
   return (
-    <div
-      className={`border p-2 rounded w-full ${numPolls > 1 ? "sm:w-[calc(50%-0.5rem)]" : ""} h-fit bg-neutral-800`}
-    >
-      <h4 className="font-bold mb-2 flex items-center justify-between ">
+    <div className={`border p-2 rounded w-full h-fit bg-neutral-800`}>
+      <h4 className="font-bold mb-2 flex items-center justify-between gap-2">
         <span className="max-w-full overflow-hidden text-ellipsis">
           {poll.text}
         </span>
