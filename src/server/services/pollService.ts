@@ -28,7 +28,14 @@ export const pollService = {
   async getLatestPolls(user?: UserModel): Promise<PollWithMeta[]> {
     const latestPolls = db
       .$with("polls")
-      .as(db.select().from(polls).orderBy(desc(polls.createdAt)).limit(20))
+      .as(
+        db
+          .select()
+          .from(polls)
+          .where(eq(polls.deleted, false))
+          .orderBy(desc(polls.createdAt))
+          .limit(20)
+      )
 
     const userVotes = alias(pollVotes, "userVote")
     try {
@@ -72,7 +79,6 @@ export const pollService = {
           userVotes.optionId,
           pollVotes.optionId
         )
-        .where(eq(latestPolls.deleted, false))
 
       const mapped = res.reduce((acc, cur) => {
         let poll = acc.find((p) => p.id === cur.id)

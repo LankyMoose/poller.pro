@@ -6,8 +6,10 @@ type PollID = string
 const connections: WeakSet<SocketStream> = new WeakSet()
 const pollSubscriptions: Record<PollID, SocketStream[]> = {}
 
-export const createPollSubscriptionSet = (pollId: PollID) =>
-  (pollSubscriptions[pollId] = [])
+export const createPollSubscriptionSet = (pollId: PollID) => {
+  if (pollSubscriptions[pollId]) return
+  pollSubscriptions[pollId] = []
+}
 
 export const deletePollSubscriptionSet = (pollId: PollID) => {
   delete pollSubscriptions[pollId]
@@ -59,5 +61,8 @@ export const socketHandler = (conn: SocketStream) => {
   })
   conn.on("close", () => handleDisconnect(conn))
   conn.on("end", () => handleDisconnect(conn))
-  conn.on("error", () => handleDisconnect(conn))
+  conn.on("error", (err) => {
+    console.error("websocket error", err)
+    handleDisconnect(conn)
+  })
 }
