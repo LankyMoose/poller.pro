@@ -1,10 +1,15 @@
+export type NewVoteCounts = {
+  id: number
+  count: number
+}[]
+
 export type WebsocketServerMessage =
   | { type: "+polls"; count: number }
   | { type: "-poll"; id: number }
   | {
       type: "~voteCounts"
       pollId: number
-      votes: { id: number; count: number }[]
+      votes: NewVoteCounts
     }
 
 export type WebsocketClientMessage =

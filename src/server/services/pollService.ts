@@ -11,12 +11,7 @@ import { PollFormScheme } from "$/models"
 import { and, count, desc, eq, sql } from "drizzle-orm"
 import { db } from "./db"
 import { alias } from "drizzle-orm/sqlite-core"
-import {
-  broadcastUpdate,
-  createPollSubscriptionSet,
-  deletePollSubscriptionSet,
-} from "../socket"
-import { PollWithMeta } from "$/types"
+import { NewVoteCounts, PollWithMeta } from "$/types"
 
 type PartialPollWithMeta = Omit<PollWithMeta, "user" | "pollOptions"> & {
   user?: PollWithMeta["user"]
@@ -120,8 +115,6 @@ export const pollService = {
         return acc
       }, [] as PartialPollWithMeta[])
 
-      mapped.forEach(({ id }) => createPollSubscriptionSet(id.toString()))
-
       return mapped.map((poll) => {
         const { pollVotes, ...rest } = poll
         poll.pollOptions?.forEach((pollOption) => {
@@ -135,9 +128,11 @@ export const pollService = {
       return []
     }
   },
-  async addPoll(poll: PollFormScheme, user: UserModel): Promise<PollWithMeta> {
+  async addPoll(
+    poll: PollFormScheme,
+    user: UserModel
+  ): Promise<PollWithMeta | undefined> {
     const { options, text } = poll
-
     return await db.transaction(async (tx) => {
       const poll: PollModel = await tx
         .insert(polls)
@@ -178,11 +173,7 @@ export const pollService = {
       )
       .returning()
       .get()
-    if (res) {
-      deletePollSubscriptionSet(id.toString())
-      return true
-    }
-    return false
+    return !!res
   },
   async vote(pollId: number, userId: number, optionId: number) {
     const res = await db
@@ -194,24 +185,15 @@ export const pollService = {
       })
       .returning()
       .get()
-    if (!res) return false
+    return !!res
+  },
 
-    const newVoteCounts = await db
+  async getVoteCounts(pollId: number) {
+    return await db
       .select({ id: pollVotes.optionId, count: count(pollVotes.id) })
       .from(pollVotes)
       .where(and(eq(pollVotes.pollId, pollId)))
       .groupBy(pollVotes.optionId)
       .all()
-    if (!newVoteCounts) {
-      console.error("vote err")
-      return false
-    }
-
-    broadcastUpdate(pollId.toString(), {
-      type: "~voteCounts",
-      pollId,
-      votes: newVoteCounts,
-    })
-    return true
   },
 }

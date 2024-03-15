@@ -3,11 +3,16 @@ import { pollService } from "../services/pollService"
 import { UserModel } from "$/drizzle/tables"
 import { pollFormScheme, pollIdScheme, pollVoteScheme } from "$/models"
 import { ZodTypeProvider } from "fastify-type-provider-zod"
+import { socketService } from "../services/socketService"
 
 export function configurePollRoutes(app: FastifyInstance) {
   app.get("/api/polls", async function (request) {
     const user = getUser(request)
-    return pollService.getLatestPolls(user)
+    const res = await pollService.getLatestPolls(user)
+    res.forEach(({ id }) =>
+      socketService.createPollSubscriptionSet(id.toString())
+    )
+    return res
   })
   app
     .withTypeProvider<ZodTypeProvider>()
@@ -35,7 +40,9 @@ export function configurePollRoutes(app: FastifyInstance) {
         user.id,
         !!user.isAdmin
       )
-      return res.code(didDelete ? 200 : 400).send(undefined)
+      if (!didDelete) return res.code(400).send(undefined)
+      socketService.deletePollSubscriptionSet(req.params.id.toString())
+      return res.code(200).send(undefined)
     }
   )
   app.withTypeProvider<ZodTypeProvider>().route({
@@ -53,7 +60,16 @@ export function configurePollRoutes(app: FastifyInstance) {
         user.id,
         req.body.pollOptionId
       )
-      return res.code(didVote ? 200 : 400).send(undefined)
+      if (!didVote) return res.code(400).send(undefined)
+
+      const newVoteCounts = await pollService.getVoteCounts(req.params.id)
+      socketService.broadcastUpdate(req.params.id.toString(), {
+        type: "~voteCounts",
+        pollId: req.params.id,
+        votes: newVoteCounts,
+      })
+
+      return newVoteCounts
     },
   })
 }

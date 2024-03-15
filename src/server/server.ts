@@ -17,7 +17,7 @@ import { env } from "./env"
 import { configureAuthRoutes } from "./api/auth"
 import { configurePollRoutes } from "./api/polls"
 import { UserModel } from "$/drizzle/tables"
-import { socketHandler } from "./socket"
+import { socketService } from "./services/socketService"
 
 declare module "fastify" {
   export interface FastifyInstance {
@@ -61,7 +61,7 @@ async function startServer() {
       method: "GET",
       url: "/ws",
       handler: (_, res) => res.status(400).send(),
-      wsHandler: socketHandler,
+      wsHandler: socketService.handleConnection,
     })
     done()
   })

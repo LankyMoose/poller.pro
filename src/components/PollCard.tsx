@@ -1,7 +1,7 @@
 import { useState, useEffect } from "kaioken"
 import { usePageContext } from "$/context/pageContext"
 import { PollVoteScheme } from "$/models"
-import type { PollWithMeta } from "$/types"
+import type { NewVoteCounts, PollWithMeta } from "$/types"
 import { useAuthModal } from "$/stores/authModalStore"
 import { usePollStore } from "$/stores/pollStore"
 import { Avatar } from "./Avatar"
@@ -53,9 +53,15 @@ export function PollCard({ id, numPolls }: { id: number; numPolls: number }) {
       })
       if (!res.ok) throw new Error(res.statusText)
 
+      const data = (await res.json()) as NewVoteCounts
+
       updatePoll({
         id: _poll.id,
         userVote: pollOptionId,
+        pollOptions: _poll.pollOptions.map((o) => {
+          const newVotes = data.find((option) => option.id === o.id)
+          return newVotes ? { ...o, count: newVotes.count } : o
+        }),
       })
     } catch (error) {
       console.error("handleVote err", error)
