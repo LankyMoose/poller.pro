@@ -2,13 +2,13 @@ import { usePollStore } from "./stores/pollStore"
 import { WebsocketClientMessage, WebsocketServerMessage } from "./types"
 
 export class LiveSocket {
-  maxRetries = 10
-  retryDelay = 1000
-  socket: WebSocket
-  pendingMessages: WebsocketClientMessage[] = []
+  private maxRetries = 10
+  private retryDelay = 1000
+  private socket: WebSocket
+  private pendingMessages: WebsocketClientMessage[] = []
 
-  constructor(url: string) {
-    this.socket = this.createSocket(url)
+  constructor(private url: string) {
+    this.socket = this.createSocket()
   }
 
   send(message: WebsocketClientMessage) {
@@ -19,9 +19,9 @@ export class LiveSocket {
     this.socket.send(JSON.stringify(message))
   }
 
-  private createSocket(url: string) {
-    const socket = new WebSocket(url)
-    socket.onmessage = (msg: any) => {
+  private createSocket() {
+    const socket = new WebSocket(this.url)
+    socket.onmessage = (msg) => {
       try {
         const data = JSON.parse(msg.data)
         if (!("type" in data)) throw new Error("received invalid message")
@@ -37,7 +37,7 @@ export class LiveSocket {
     socket.onclose = () => {
       setTimeout(() => {
         if (this.maxRetries-- > 0) {
-          this.socket = this.createSocket(url)
+          this.socket = this.createSocket()
         }
       }, this.retryDelay)
     }
