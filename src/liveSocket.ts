@@ -6,20 +6,7 @@ export class LiveSocket {
   pendingMessages: WebsocketClientMessage[] = []
 
   constructor(url: string) {
-    this.socket = new WebSocket(url)
-    this.socket.onmessage = (msg: any) => {
-      try {
-        const data = JSON.parse(msg.data)
-        if (!("type" in data)) throw new Error("received invalid message")
-        this.handleMessage(data)
-      } catch (error) {
-        console.error(error)
-      }
-    }
-    this.socket.onopen = () => {
-      while (this.pendingMessages.length)
-        this.send(this.pendingMessages.shift()!)
-    }
+    this.socket = this.createSocket(url)
   }
 
   send(message: WebsocketClientMessage) {
@@ -28,6 +15,27 @@ export class LiveSocket {
       return
     }
     this.socket.send(JSON.stringify(message))
+  }
+
+  private createSocket(url: string) {
+    const socket = new WebSocket(url)
+    socket.onmessage = (msg: any) => {
+      try {
+        const data = JSON.parse(msg.data)
+        if (!("type" in data)) throw new Error("received invalid message")
+        this.handleMessage(data)
+      } catch (error) {
+        console.error(error)
+      }
+    }
+    socket.onopen = () => {
+      while (this.pendingMessages.length)
+        this.send(this.pendingMessages.shift()!)
+    }
+    socket.onclose = () => {
+      this.socket = this.createSocket(url)
+    }
+    return socket
   }
 
   private handleMessage(message: WebsocketServerMessage) {
