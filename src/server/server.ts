@@ -61,7 +61,7 @@ async function startServer() {
       method: "GET",
       url: "/ws",
       handler: (_, res) => res.status(400).send(),
-      wsHandler: socketService.handleConnection,
+      wsHandler: socketService.handleConnection.bind(socketService),
     })
     done()
   })

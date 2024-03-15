@@ -2,6 +2,8 @@ import { usePollStore } from "./stores/pollStore"
 import { WebsocketClientMessage, WebsocketServerMessage } from "./types"
 
 export class LiveSocket {
+  maxRetries = 10
+  retryDelay = 1000
   socket: WebSocket
   pendingMessages: WebsocketClientMessage[] = []
 
@@ -10,7 +12,7 @@ export class LiveSocket {
   }
 
   send(message: WebsocketClientMessage) {
-    if (this.socket.readyState !== this.socket.OPEN) {
+    if (this.socket.readyState !== 1) {
       this.pendingMessages.push(message)
       return
     }
@@ -33,7 +35,11 @@ export class LiveSocket {
         this.send(this.pendingMessages.shift()!)
     }
     socket.onclose = () => {
-      this.socket = this.createSocket(url)
+      setTimeout(() => {
+        if (this.maxRetries-- > 0) {
+          this.socket = this.createSocket(url)
+        }
+      }, this.retryDelay)
     }
     return socket
   }
