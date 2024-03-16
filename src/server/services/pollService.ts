@@ -176,6 +176,22 @@ export const pollService = {
     return !!res
   },
   async vote(pollId: number, userId: number, optionId: number) {
+    const poll = await db
+      .select({ id: polls.id })
+      .from(polls)
+      .leftJoin(pollOptions, eq(polls.id, pollOptions.pollId))
+      .where(
+        and(
+          eq(polls.id, pollId),
+          eq(polls.deleted, false),
+          eq(polls.closed, false),
+          eq(pollOptions.id, optionId),
+          eq(pollOptions.pollId, pollId)
+        )
+      )
+      .all()
+    if (!poll.length) return false
+
     const res = await db
       .insert(pollVotes)
       .values({ pollId, userId, optionId })
@@ -185,14 +201,23 @@ export const pollService = {
       })
       .returning()
       .get()
-    return !!res
+    if (!res) return false
+
+    return pollId
   },
 
   async getVoteCounts(pollId: number) {
     return await db
       .select({ id: pollVotes.optionId, count: count(pollVotes.id) })
       .from(pollVotes)
-      .where(and(eq(pollVotes.pollId, pollId)))
+      .leftJoin(
+        pollOptions,
+        and(
+          eq(pollVotes.optionId, pollOptions.id),
+          eq(pollVotes.pollId, pollOptions.pollId)
+        )
+      )
+      .where(and(eq(pollVotes.pollId, pollId), eq(pollOptions.pollId, pollId)))
       .groupBy(pollVotes.optionId)
       .all()
   },

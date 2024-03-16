@@ -62,7 +62,13 @@ export class LiveSocket {
           }
         })
 
-        usePollStore.methods.updatePoll({ id: poll.id, pollOptions })
+        const userVote = message.userVote ?? poll.userVote
+
+        usePollStore.methods.updatePoll({
+          id: poll.id,
+          pollOptions,
+          userVote,
+        })
         break
 
       case "-poll":

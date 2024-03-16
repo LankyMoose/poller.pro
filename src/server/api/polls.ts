@@ -63,11 +63,16 @@ export function configurePollRoutes(app: FastifyInstance) {
       if (!didVote) return res.code(400).send(undefined)
 
       const newVoteCounts = await pollService.getVoteCounts(req.params.id)
-      socketService.broadcastUpdate(req.params.id.toString(), {
-        type: "~voteCounts",
-        pollId: req.params.id,
-        votes: newVoteCounts,
-      })
+      socketService.broadcastUpdate(
+        req.params.id.toString(),
+        {
+          type: "~voteCounts",
+          pollId: req.params.id,
+          votes: newVoteCounts,
+        },
+        (id, msg) =>
+          id === user.id ? { ...msg, userVote: req.body.pollOptionId } : msg
+      )
 
       return newVoteCounts
     },

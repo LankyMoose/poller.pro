@@ -10,6 +10,7 @@ export type WebsocketServerMessage =
       type: "~voteCounts"
       pollId: number
       votes: NewVoteCounts
+      userVote?: number
     }
 
 export type WebsocketClientMessage =
