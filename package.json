@@ -33,7 +33,7 @@
     "drizzle-orm": "^0.30.1",
     "fastify": "^4.26.2",
     "fastify-type-provider-zod": "^1.1.9",
-    "kaioken": "^0.10.4",
+    "kaioken": "^0.10.5",
     "tsx": "^4.7.1",
     "vike": "^0.4.165",
     "vite": "^5.1.5",

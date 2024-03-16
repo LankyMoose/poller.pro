@@ -36,8 +36,8 @@ dependencies:
     specifier: ^1.1.9
     version: 1.1.9(fastify@4.26.2)(zod@3.22.4)
   kaioken:
-    specifier: ^0.10.4
-    version: 0.10.4
+    specifier: ^0.10.5
+    version: 0.10.5
   tsx:
     specifier: ^4.7.1
     version: 4.7.1
@@ -1948,8 +1948,8 @@ packages:
     resolution: {integrity: sha512-NM8/P9n3XjXhIZn1lLhkFaACTOURQXjWhV4BA/RnOv8xvgqtqpAX9IO4mRQxSx1Rlo4tqzeqb0sOlruaOy3dug==}
     dev: false
 
-  /kaioken@0.10.4:
-    resolution: {integrity: sha512-PHZoMhvNhBlXRtTPMBKcJel+nqWbieDs6YlKmtDXOQjsTRxM7Loqe+pesCZDTGDsJHhz1CiF6shWYcgszPt//w==}
+  /kaioken@0.10.5:
+    resolution: {integrity: sha512-AlnTWkLHP5nB3GbkFc331qR+r93oIHwgyMnkHcYsEnkIL/+jvOU0/lPYuVrPW3Ba7DxK951lm57tRYUjvfHfFA==}
     dev: false
 
   /libsql@0.3.8:
