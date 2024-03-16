@@ -1,7 +1,6 @@
 import { useState, useEffect } from "kaioken"
 import { usePageContext } from "$/context/pageContext"
 import { PollVoteScheme } from "$/models"
-import type { NewVoteCounts, PollWithMeta } from "$/types"
 import { useAuthModal } from "$/stores/authModalStore"
 import { usePollStore } from "$/stores/pollStore"
 import { Avatar } from "./Avatar"
@@ -41,6 +40,7 @@ export function PollCard({ id }: { id: number }) {
       return setOpen(true)
     }
     setIsVoting(true)
+    console.log("setVoting", true)
     try {
       const payload: PollVoteScheme = { pollOptionId }
       const res = await fetch(`/api/polls/${id}/vote`, {
@@ -53,6 +53,7 @@ export function PollCard({ id }: { id: number }) {
       console.error("handleVote err", error)
     } finally {
       setIsVoting(false)
+      console.log("setVoting", false)
     }
   }
 
