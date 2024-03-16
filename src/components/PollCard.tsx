@@ -59,6 +59,8 @@ export function PollCard({ id }: { id: number }) {
 
   if (!poll) return null
 
+  if (poll.id === 2) console.log("render poll", isVoting, poll)
+
   const totalVotes = poll.pollOptions.reduce((a, b) => a + b.count, 0)
   const percentages = poll.pollOptions.map((o) => ({
     id: o.id,
