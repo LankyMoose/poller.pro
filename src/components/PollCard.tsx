@@ -40,7 +40,6 @@ export function PollCard({ id }: { id: number }) {
       return setOpen(true)
     }
     setIsVoting(true)
-    console.log("setVoting", true)
     try {
       const payload: PollVoteScheme = { pollOptionId }
       const res = await fetch(`/api/polls/${id}/vote`, {
@@ -53,13 +52,10 @@ export function PollCard({ id }: { id: number }) {
       console.error("handleVote err", error)
     } finally {
       setIsVoting(false)
-      console.log("setVoting", false)
     }
   }
 
   if (!poll) return null
-
-  if (poll.id === 2) console.log("render poll", isVoting, poll)
 
   const totalVotes = poll.pollOptions.reduce((a, b) => a + b.count, 0)
   const percentages = poll.pollOptions.map((o) => ({
