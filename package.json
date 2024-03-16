@@ -7,9 +7,9 @@
     "dev": "tsx watch --ignore ./* ./src/server/server.ts",
     "build": "vite build",
     "preview": "set NODE_ENV=production&& tsx ./src/server/server.ts",
-    "db:create-migration": "pnpm drizzle-kit generate:sqlite",
-    "db:migrate": "pnpm tsx ./src/drizzle/migrate.ts",
-    "db:studio": "pnpm drizzle-kit studio"
+    "db:create-migration": "drizzle-kit generate:sqlite",
+    "db:migrate": "tsx ./src/drizzle/migrate.ts",
+    "db:studio": "drizzle-kit studio"
   },
   "keywords": [],
   "author": "",

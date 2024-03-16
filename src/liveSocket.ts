@@ -2,17 +2,17 @@ import { usePollStore } from "./stores/pollStore"
 import { WebsocketClientMessage, WebsocketServerMessage } from "./types"
 
 export class LiveSocket {
-  private maxRetries = 10
-  private retryDelay = 1000
-  private socket: WebSocket
+  private retryDelay = 5000
+  private socket: WebSocket | null = null
   private pendingMessages: WebsocketClientMessage[] = []
+  private connecting = false
 
   constructor(private url: string) {
-    this.socket = this.createSocket()
+    this.createSocket()
   }
 
   send(message: WebsocketClientMessage) {
-    if (this.socket.readyState !== 1) {
+    if (this.socket?.readyState !== 1) {
       this.pendingMessages.push(message)
       return
     }
@@ -20,28 +20,40 @@ export class LiveSocket {
   }
 
   private createSocket() {
-    const socket = new WebSocket(this.url)
-    socket.onmessage = (msg) => {
-      try {
-        const data = JSON.parse(msg.data)
-        if (!("type" in data)) throw new Error("received invalid message")
-        this.handleMessage(data)
-      } catch (error) {
-        console.error(error)
-      }
-    }
-    socket.onopen = () => {
-      while (this.pendingMessages.length)
-        this.send(this.pendingMessages.shift()!)
-    }
-    socket.onclose = () => {
-      setTimeout(() => {
-        if (this.maxRetries-- > 0) {
-          this.socket = this.createSocket()
+    this.connecting = true
+    try {
+      this.socket = new WebSocket(this.url)
+      this.socket.onmessage = (msg) => {
+        try {
+          const data = JSON.parse(msg.data)
+          if (!("type" in data)) throw new Error("received invalid message")
+          this.handleMessage(data)
+        } catch (error) {
+          console.error(error)
         }
-      }, this.retryDelay)
+      }
+      this.socket.onopen = () => {
+        this.connecting = false
+        while (this.pendingMessages.length)
+          this.send(this.pendingMessages.shift()!)
+      }
+      this.socket.onclose = this.reconnect.bind(this)
+      this.socket.onerror = this.reconnect.bind(this)
+    } catch (error) {
+      console.error(error)
+      this.reconnect()
     }
-    return socket
+  }
+
+  private reconnect() {
+    if (this.connecting) return
+    if (this.socket?.readyState === 1) return
+
+    this.connecting = true
+    setTimeout(() => {
+      if (this.socket?.readyState === 1) return
+      this.createSocket()
+    }, this.retryDelay)
   }
 
   private handleMessage(message: WebsocketServerMessage) {
