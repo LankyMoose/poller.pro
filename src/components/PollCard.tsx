@@ -14,11 +14,9 @@ export function PollCard({ id }: { id: number }) {
   const [isVoting, setIsVoting] = useState(false)
   const { setOpen } = useAuthModal()
   const { user } = usePageContext()
-  const {
-    value: poll,
-    deletePoll,
-    updatePoll,
-  } = usePollStore((state) => state.polls.find((p) => p.id === id))
+  const { value: poll, deletePoll } = usePollStore((state) =>
+    state.polls.find((p) => p.id === id)
+  )
 
   useEffect(() => {
     if (!poll || !user) return
@@ -43,7 +41,6 @@ export function PollCard({ id }: { id: number }) {
       return setOpen(true)
     }
     setIsVoting(true)
-    const _poll = poll as PollWithMeta
     try {
       const payload: PollVoteScheme = { pollOptionId }
       const res = await fetch(`/api/polls/${id}/vote`, {
@@ -52,17 +49,6 @@ export function PollCard({ id }: { id: number }) {
         headers: { "Content-Type": "application/json" },
       })
       if (!res.ok) throw new Error(res.statusText)
-
-      const data = (await res.json()) as NewVoteCounts
-
-      updatePoll({
-        id: _poll.id,
-        userVote: pollOptionId,
-        pollOptions: _poll.pollOptions.map((o) => {
-          const newVotes = data.find((option) => option.id === o.id)
-          return newVotes ? { ...o, count: newVotes.count } : o
-        }),
-      })
     } catch (error) {
       console.error("handleVote err", error)
     } finally {

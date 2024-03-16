@@ -74,7 +74,7 @@ export function configurePollRoutes(app: FastifyInstance) {
           id === user.id ? { ...msg, userVote: req.body.pollOptionId } : msg
       )
 
-      return newVoteCounts
+      return res.code(200).send(undefined)
     },
   })
 }
