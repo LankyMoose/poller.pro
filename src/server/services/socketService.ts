@@ -7,7 +7,7 @@ type UserID = number
 
 export const socketService = {
   connections: new WeakSet<SocketStream>(),
-  pollSubscriptions: {} as Record<PollID, [UserID, SocketStream][]>,
+  pollSubscriptions: {} as Record<PollID, [UserID, SocketStream[]][]>,
 
   createPollSubscriptionSet(pollId: PollID) {
     if (this.pollSubscriptions[pollId]) return
@@ -26,27 +26,26 @@ export const socketService = {
     const clients = this.pollSubscriptions[pollId] ?? []
     try {
       clients.forEach((client) => {
-        const [userId, conn] = client
-        if (conn.socket.readyState !== 1) {
-          return console.error(
-            "[SocketService]: ws conn not open",
-            conn.socket.readyState
-          )
-        }
+        const [userId, conns] = client
         const msg = mutator ? mutator(userId, message) : message
-        conn.socket.send(JSON.stringify(msg))
+
+        conns.forEach((conn) => {
+          if (conn.socket.readyState !== 1) return
+          conn.socket.send(JSON.stringify(msg))
+        })
       })
     } catch (error) {
       console.error("[SocketService]: broadcastUpdate error", error)
     }
   },
 
-  handleDisconnect(conn: SocketStream) {
+  handleDisconnect(userId: UserID, conn: SocketStream) {
     this.connections.delete(conn)
     Object.keys(this.pollSubscriptions).forEach((pollId) => {
-      this.pollSubscriptions[pollId] = this.pollSubscriptions[pollId].filter(
-        ([_, c]) => c !== conn
-      )
+      this.pollSubscriptions[pollId].forEach(([id, conns]) => {
+        if (id !== userId) return
+        conns.splice(conns.indexOf(conn), 1)
+      })
     })
   },
 
@@ -54,7 +53,6 @@ export const socketService = {
     if (!req.cookies["user"]) return
 
     const user = JSON.parse(req.cookies["user"])
-
     this.connections.add(conn)
 
     conn.setEncoding("utf8")
@@ -63,24 +61,33 @@ export const socketService = {
       switch (data.type) {
         case "+sub":
           if (!this.pollSubscriptions[data.id]) return
-          if (this.pollSubscriptions[data.id].find(([id]) => id === user.id))
+          const match = this.pollSubscriptions[data.id].find(
+            ([id]) => id === user.id
+          )
+          if (match) {
+            if (!match[1].includes(conn)) match[1].push(conn)
             return
-          this.pollSubscriptions[data.id].push([user.id, conn])
+          }
+          this.pollSubscriptions[data.id].push([user.id, [conn]])
           break
         case "-sub":
-          if (!this.pollSubscriptions[data.id]) return
-          this.pollSubscriptions[data.id] = this.pollSubscriptions[
-            data.id
-          ].filter(([id]) => id !== user.id)
+          const collection = this.pollSubscriptions[data.id]
+          if (!collection) return
+
+          collection.forEach(([id, conns]) => {
+            if (id !== user.id) return
+            conns.splice(conns.indexOf(conn), 1)
+          })
+
           break
         default:
       }
     })
-    conn.on("close", () => this.handleDisconnect(conn))
-    conn.on("end", () => this.handleDisconnect(conn))
+    conn.on("close", () => this.handleDisconnect(user.id, conn))
+    conn.on("end", () => this.handleDisconnect(user.id, conn))
     conn.on("error", (err) => {
       console.error("[SocketService]: websocket error", err)
-      this.handleDisconnect(conn)
+      this.handleDisconnect(user.id, conn)
     })
   },
 }
