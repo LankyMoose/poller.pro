@@ -11,7 +11,7 @@ import { PollFormScheme } from "$/models"
 import { and, count, desc, eq, sql } from "drizzle-orm"
 import { db } from "./db"
 import { alias } from "drizzle-orm/sqlite-core"
-import { NewVoteCounts, PollWithMeta } from "$/types"
+import { PollWithMeta } from "$/types"
 
 type PartialPollWithMeta = Omit<PollWithMeta, "user" | "pollOptions"> & {
   user?: PollWithMeta["user"]
@@ -20,7 +20,7 @@ type PartialPollWithMeta = Omit<PollWithMeta, "user" | "pollOptions"> & {
 }
 
 export const pollService = {
-  async getLatestPolls(user?: UserModel): Promise<PollWithMeta[]> {
+  async getLatestPolls(user: UserModel | null): Promise<PollWithMeta[]> {
     const latestPolls = db
       .$with("polls")
       .as(

@@ -1,13 +1,13 @@
-import { FastifyInstance, FastifyRequest } from "fastify"
+import { FastifyInstance } from "fastify"
 import { pollService } from "../services/pollService"
-import { UserModel } from "$/drizzle/tables"
 import { pollFormScheme, pollIdScheme, pollVoteScheme } from "$/models"
 import { ZodTypeProvider } from "fastify-type-provider-zod"
 import { socketService } from "../services/socketService"
+import { authService } from "../services/authService"
 
 export function configurePollRoutes(app: FastifyInstance) {
   app.get("/api/polls", async function (request) {
-    const user = getUser(request)
+    const user = authService.getRequestUser(request)
     const res = await pollService.getLatestPolls(user)
     res.forEach(({ id }) =>
       socketService.createPollSubscriptionSet(id.toString())
@@ -20,7 +20,7 @@ export function configurePollRoutes(app: FastifyInstance) {
       "/api/polls",
       { schema: { body: pollFormScheme } },
       async function (req) {
-        const user = getUser(req)
+        const user = authService.getRequestUser(req)
         if (!user) throw { statusCode: 401, message: "Unauthorized" }
         return pollService.addPoll(req.body, user)
       }
@@ -33,7 +33,7 @@ export function configurePollRoutes(app: FastifyInstance) {
       },
     },
     async function (req, res) {
-      const user = getUser(req)
+      const user = authService.getRequestUser(req)
       if (!user) throw { statusCode: 401, message: "Unauthorized" }
       const didDelete = await pollService.deletePoll(
         req.params.id,
@@ -53,7 +53,7 @@ export function configurePollRoutes(app: FastifyInstance) {
       body: pollVoteScheme,
     },
     handler: async (req, res) => {
-      const user = getUser(req)
+      const user = authService.getRequestUser(req)
       if (!user) throw { statusCode: 401, message: "Unauthorized" }
       const didVote = await pollService.vote(
         req.params.id,
@@ -63,6 +63,7 @@ export function configurePollRoutes(app: FastifyInstance) {
       if (!didVote) return res.code(400).send(undefined)
 
       const newVoteCounts = await pollService.getVoteCounts(req.params.id)
+      // wsRouter.$synced.voteCounts[req.params.id] = newVoteCounts
       socketService.broadcastUpdate(
         req.params.id.toString(),
         {
@@ -77,10 +78,4 @@ export function configurePollRoutes(app: FastifyInstance) {
       return res.code(200).send(undefined)
     },
   })
-}
-
-function getUser(request: FastifyRequest): UserModel | undefined {
-  return request.cookies["user"]
-    ? JSON.parse(request.cookies["user"])
-    : undefined
 }

@@ -1,6 +1,7 @@
 import { SocketStream } from "@fastify/websocket"
 import { WebsocketClientMessage, WebsocketServerMessage } from "$/types"
 import { FastifyRequest } from "fastify"
+import { authService } from "./authService"
 
 type PollID = string
 type UserID = number
@@ -50,9 +51,8 @@ export const socketService = {
   },
 
   handleConnection(conn: SocketStream, req: FastifyRequest) {
-    if (!req.cookies["user"]) return
-
-    const user = JSON.parse(req.cookies["user"])
+    const user = authService.getRequestUser(req)
+    if (!user) throw "Unauthorized"
     this.connections.add(conn)
 
     conn.setEncoding("utf8")

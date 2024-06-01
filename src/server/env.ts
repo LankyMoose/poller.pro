@@ -1,30 +1,11 @@
-import dotenv from "dotenv"
-dotenv.config()
+import envpls from "envpls"
 
-type ValidatedObj<T> = {
-  [P in keyof T]: T[P] extends string | undefined ? string : ValidatedObj<T[P]>
-}
-
-function validate<T>(obj: T, path: string = "", errors: string[] = []) {
-  for (const key in obj) {
-    const keyPath = (path.length > 0 ? path + "." : "") + key
-    if (typeof obj[key] === "object") {
-      validate(obj[key], keyPath, errors)
-    } else if (obj[key] === undefined) {
-      errors.push(keyPath)
-    }
-  }
-  if (errors.length > 0) {
-    throw new Error(`Missing env variables: ${errors.join(", ")}`)
-  }
-  return obj as ValidatedObj<T>
-}
-
-export const env = validate({
+export const env = envpls({
   server: {
     host: process.env.HOST || "localhost",
     port: Number(process.env.PORT || "5173"),
   },
+  jwt_secret: process.env.JWT_SECRET,
   url: process.env.URL || "http://localhost:5173",
   domain: process.env.DOMAIN || "localhost",
   isProduction: process.env.NODE_ENV === "production",

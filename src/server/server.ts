@@ -16,8 +16,8 @@ import {
 import { env } from "./env"
 import { configureAuthRoutes } from "./api/auth"
 import { configurePollRoutes } from "./api/polls"
-import { UserModel } from "$/drizzle/tables"
 import { socketService } from "./services/socketService"
+import { authService } from "./services/authService"
 
 declare module "fastify" {
   export interface FastifyInstance {
@@ -104,11 +104,12 @@ async function startServer() {
   configurePollRoutes(app)
 
   app.get("*", async (request, reply) => {
-    const reqUser = request.cookies["user"]
+    const user = authService.getRequestUser(request)
+    if (user) authService.setRequestUser(reply, user)
 
     const pageContextInit = {
       urlOriginal: request.raw.url || "",
-      user: reqUser ? (JSON.parse(reqUser) as UserModel) : null,
+      user: user,
     }
     const pageContext = await renderPage(pageContextInit)
     const { httpResponse } = pageContext

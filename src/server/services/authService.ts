@@ -7,11 +7,19 @@
 //   newcommunity?: true
 // }
 
-import { UserAuthInsertModel, UserAuthModel, userAuths } from "$/drizzle/schema"
+import {
+  UserAuthInsertModel,
+  UserAuthModel,
+  UserModel,
+  userAuths,
+} from "$/drizzle/schema"
 import { eq, and } from "drizzle-orm"
 import { db } from "./db"
-import { FastifyInstance, FastifyRequest } from "fastify"
+import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify"
 import { AuthProvider } from "$/types"
+import jwt from "jsonwebtoken"
+import { env } from "../env"
+import { cookieSettings } from "../cookies"
 
 export type AuthCallbackState = Record<string, unknown>
 
@@ -32,6 +40,32 @@ export type ProviderInfo<T extends AuthProvider> = T extends AuthProvider.Google
     : never
 
 export const authService = {
+  getRequestUser(request: FastifyRequest) {
+    const tkn = request.cookies["token"]
+    if (!tkn) return null
+    const decoded = jwt.verify(tkn, env.jwt_secret) as {
+      data: UserModel
+      iat: number
+      exp: number
+    }
+    return decoded.data
+  },
+
+  setRequestUser(reply: FastifyReply, user: UserModel) {
+    const token = jwt.sign(
+      {
+        exp: Math.floor(Date.now() / 1000) + 60 * 60,
+        data: user,
+      },
+      env.jwt_secret
+    )
+
+    reply.setCookie("token", token, {
+      ...cookieSettings,
+      httpOnly: true,
+    })
+  },
+
   async getByProviderId(
     provider: AuthProvider,
     providerId: string
