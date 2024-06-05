@@ -68,7 +68,8 @@ function PollListDisplay() {
         </p>
       )}
       {polls.map((poll) => (
-        <PollCard id={poll.id} />
+        // @ts-ignore
+        <PollCard key={poll.id} id={poll.id} />
       ))}
     </div>
   )
