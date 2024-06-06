@@ -113,7 +113,7 @@ async function startServer() {
     } catch (error) {
       if (error instanceof jwt.TokenExpiredError) {
         user = null
-        reply.clearCookie("token")
+        authService.clearRequestUser(reply)
       }
       console.error(error)
     }
