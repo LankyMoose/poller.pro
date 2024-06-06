@@ -66,6 +66,13 @@ export const authService = {
     })
   },
 
+  clearRequestUser(reply: FastifyReply) {
+    reply.clearCookie("token", {
+      ...cookieSettings,
+      httpOnly: true,
+    })
+  },
+
   async getByProviderId(
     provider: AuthProvider,
     providerId: string

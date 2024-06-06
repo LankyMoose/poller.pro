@@ -7,6 +7,7 @@ import cookie from "@fastify/cookie"
 import { OAuth2Namespace } from "@fastify/oauth2"
 import fStatic from "@fastify/static"
 import fWebsocket from "@fastify/websocket"
+import jwt from "jsonwebtoken"
 
 import {
   serializerCompiler,
@@ -18,6 +19,7 @@ import { configureAuthRoutes } from "./api/auth"
 import { configurePollRoutes } from "./api/polls"
 import { socketService } from "./services/socketService"
 import { authService } from "./services/authService"
+import { UserModel } from "$/drizzle/tables"
 
 declare module "fastify" {
   export interface FastifyInstance {
@@ -104,8 +106,17 @@ async function startServer() {
   configurePollRoutes(app)
 
   app.get("*", async (request, reply) => {
-    const user = authService.getRequestUser(request)
-    if (user) authService.setRequestUser(reply, user)
+    let user: UserModel | null = null
+    try {
+      user = authService.getRequestUser(request)
+      if (user) authService.setRequestUser(reply, user)
+    } catch (error) {
+      if (error instanceof jwt.TokenExpiredError) {
+        user = null
+        reply.clearCookie("token")
+      }
+      console.error(error)
+    }
 
     const pageContextInit = {
       urlOriginal: request.raw.url || "",
